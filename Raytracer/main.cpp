@@ -58,7 +58,7 @@ void RenderScene()
 
 	// Start compute
 	//glDispatchCompute(1024 / 16, 768 / 16, 1);
-	glDispatchCompute(512 / 16, 512 / 16, 1);
+	glDispatchCompute(1024 / 16, 768 / 16, 1);
 
 	// Render the results
 	glUseProgram(g_renderProgramHandle);

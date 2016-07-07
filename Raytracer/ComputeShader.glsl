@@ -41,7 +41,8 @@ void main()
 
 	ivec2 storePos = ivec2(gl_GlobalInvocationID.xy);
 	
-	vec4 color = vec4(1,0,0, 1);
+	// vec4 color = vec4(direction.x,0,0, 1);
+	vec4 color = vec4(0 ,0 ,direction.z, 1);
 	imageStore(destTex, storePos, color);
 }
 

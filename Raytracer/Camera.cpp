@@ -8,6 +8,7 @@ Camera::Camera(vec3 p_target, vec3 p_up, vec3 p_position)
 	m_view = lookAt(m_position, m_target + m_position, m_up);
 	m_projection = perspectiveFov(90, g_windowWidth, g_windowheight, 0, 10000); // hard-coded zfar
 
+	// UNUSED so far
 	m_rotateAngle = 0;
 	m_verticalAngle = 0;
 	m_horizonalAngle = 3.1415; // pi

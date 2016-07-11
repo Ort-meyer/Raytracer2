@@ -10,6 +10,7 @@
 // My own stuff
 #include "GlobalConstants.h"
 #include "GraphicsHelper.h"
+#include "InputHelper.h"
 #include "Camera.h"
 
 
@@ -37,6 +38,9 @@ void RenderScene()
 {
 	// Update things
 	g_camera->Update(); // Does nothing so far...
+
+    g_camera->m_position = Input::GetNewPosition(g_camera->m_position, vec3(0, 0, 1));
+    cout << "X " << g_camera->m_position.x << ". Y" << g_camera->m_position.y << ". Z" << g_camera->m_position.z << endl;
 
 	/// Render things
 	// Start with clearing the screen
@@ -68,10 +72,17 @@ void RenderScene()
 	glutSwapBuffers();
 }
 
-// Method to handle keyboard input. Bound to glut callback
-void HandleKeyboardInput(unsigned char key, int x, int y)
+// Methods to handle keyboard input. Bound to glut callback
+void HandleKeyboardInputUp(unsigned char key, int x, int y)
 {
+    //cout << "up" << endl;
+    Input::UpdateKeyDown(key);
+}
 
+void HandleKeyboardInputDown(unsigned char key, int x, int y)
+{
+    //cout << "down" << endl;
+    Input::UpdateKeyUp(key);
 }
 
 // Method to handle mouse input. Bound to glut callback
@@ -85,7 +96,9 @@ void InitializeGlutCallbacks()
 {
 	glutDisplayFunc(RenderScene);
 	glutIdleFunc(RenderScene);
-	glutKeyboardUpFunc(HandleKeyboardInput);
+    // Keyboard callbacks seem inverted... glut is silly sometimes
+	glutKeyboardUpFunc(HandleKeyboardInputDown);
+    glutKeyboardFunc(HandleKeyboardInputUp);
 	glutPassiveMotionFunc(HandleMouseMovement);
 }
 

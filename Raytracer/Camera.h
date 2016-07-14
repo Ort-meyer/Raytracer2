@@ -61,6 +61,7 @@ private:
 	float m_rotateAngle, m_horizonalAngle, m_verticalAngle;
 
     float m_movementSpeed;
+	float m_turnSpeed;
 
     void UpdatePosition();
     void UpdateRotation();

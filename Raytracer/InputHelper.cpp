@@ -1,4 +1,11 @@
+// This class
 #include "InputHelper.h"
+
+// Third party libraries
+#include <GL\freeglut.h>
+
+// My own stuff
+#include "GlobalConstants.h"
 
 using namespace Input;
 
@@ -14,22 +21,22 @@ void InputHelper::UpdateKeyDown(char key)
     {
     case 'w':
     case 'W':
-		g_keysPressed |= (int)Keys::W;
+		m_keysPressed |= (int)Keys::W;
         break;
 
     case 'a':
     case 'A':
-        g_keysPressed |= (int)Keys::A;
+		m_keysPressed |= (int)Keys::A;
         break;
 
     case 's':
     case 'S':
-        g_keysPressed |= (int)Keys::S;
+		m_keysPressed |= (int)Keys::S;
         break;
 
     case 'd':
     case 'D':
-        g_keysPressed |= (int)Keys::D;
+		m_keysPressed |= (int)Keys::D;
         break;
 
     }
@@ -41,25 +48,32 @@ void InputHelper::UpdateKeyUp(char key)
     {
     case 'w':
     case 'W':
-        g_keysPressed  ^= (int)Keys::W;
+		m_keysPressed ^= (int)Keys::W;
         break;
 
     case 'a':
     case 'A':
-        g_keysPressed ^= (int)Keys::A;
+		m_keysPressed ^= (int)Keys::A;
         break;
 
     case 's':
     case 'S':
-        g_keysPressed ^= (int)Keys::S;
+		m_keysPressed ^= (int)Keys::S;
         break;
 
     case 'd':
     case 'D':
-        g_keysPressed ^= (int)Keys::D;
+		m_keysPressed ^= (int)Keys::D;
         break;
-
     }
+}
+
+void Input::InputHelper::WarpMouseToMiddle(int x, int y)
+{
+	glutWarpPointer(g_windowWidth / 2, g_windowheight / 2);
+	m_deltaPixelsX = x - g_windowWidth / 2;
+	m_deltaPixelsY = y - g_windowheight / 2;
+
 }
 
 

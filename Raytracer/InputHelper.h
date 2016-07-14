@@ -24,12 +24,11 @@ namespace Input
 		static InputHelper* GetInstance();
 
 		// Input bitmask. Keys pressed down are 1
-		int g_keysPressed = 0;
-
+		int m_keysPressed = 0;
 
 		// Floats where we store rotations
-		float g_deltaAngleX = 0;
-		float g_deltaAngleY = 0;
+		float m_deltaPixelsX = 0;
+		float m_deltaPixelsY = 0;
 
 		/*
 		Updates the bit mask when a key is pressed.
@@ -42,9 +41,10 @@ namespace Input
 		void UpdateKeyUp(char key);
 
 		/*
-		Takes x and y coordinates of the mouse and translates
-		into difference */
-		void TranslateMouseIntoAngles(int x, int y);
+		Warps the mouse to the middle and stores the
+		distance it moved last frame (in pixels) in
+		member variables*/
+		void WarpMouseToMiddle(int x, int y);
 
 	protected:
 		InputHelper();

@@ -2,7 +2,6 @@
 
 #include "InputHelper.h"
 
-
 Camera::Camera(vec3 p_target, vec3 p_up, vec3 p_position)
 	:m_target(normalize(p_target)), m_up(p_up), m_position(p_position)
 {
@@ -13,6 +12,7 @@ Camera::Camera(vec3 p_target, vec3 p_up, vec3 p_position)
 	m_verticalAngle = 0;
 	m_horizonalAngle = 3.1415; // pi
 	m_movementSpeed = 0.01f;
+	m_turnSpeed = 0.0001f;
 
 	// Image a unit-cope, and use the projectionmatrix to expand it into a frustum
 	//m_frustum.ray00 = vec3(inverse(GetViewProj())*vec4(-1, -1, 1, 0));
@@ -54,6 +54,7 @@ mat4 Camera::GetViewProj()
 void Camera::Update()
 {
     UpdatePosition();
+	UpdateRotation();
 }
 
 void Camera::UpdatePosition()
@@ -62,12 +63,12 @@ void Camera::UpdatePosition()
 	InputHelper* t_inputHelper = InputHelper::GetInstance();
     /// Check which keys/ are held down
     // Forward and back
-    if (t_inputHelper->g_keysPressed & (int)Keys::W == (int)Keys::W)
+    if (t_inputHelper->m_keysPressed & (int)Keys::W == (int)Keys::W)
     {
         m_position += m_target * m_movementSpeed;
     }
 
-    if (t_inputHelper->g_keysPressed & (int)Keys::S)
+    if (t_inputHelper->m_keysPressed & (int)Keys::S)
     {
         m_position -= m_target * m_movementSpeed;
     }
@@ -76,19 +77,34 @@ void Camera::UpdatePosition()
     vec3 t_up = vec3(0, 1, 0);
     vec3 t_right = cross(t_up, m_target);
     t_right = normalize(t_right);
-    if (t_inputHelper->g_keysPressed & (int)Keys::A)
+    if (t_inputHelper->m_keysPressed & (int)Keys::A)
     {
-        m_position += t_right * m_movementSpeed;
+        m_position -= t_right * m_movementSpeed;
     }
 
-    if (t_inputHelper->g_keysPressed & (int)Keys::D)
+    if (t_inputHelper->m_keysPressed & (int)Keys::D)
     {
-        m_position -= t_right  * m_movementSpeed;
+        m_position += t_right  * m_movementSpeed;
     }
 }
 
 void Camera::UpdateRotation()
 {
+	// Get angles and modify with turn speed
+	using namespace Input;
+	float t_angleX = InputHelper::GetInstance()->m_deltaPixelsX * m_turnSpeed;
+	float t_angleY = InputHelper::GetInstance()->m_deltaPixelsY * m_turnSpeed;
 
+	mat4x4 t_rotationX = rotate(t_angleX, vec3(0, 1, 0));
+	mat4x4 t_rotationY = rotate(-t_angleY, vec3(1, 0, 0));
+
+
+	vec4 t_tar4 = t_rotationX * t_rotationY * vec4(m_target, 0);
+	m_target = vec3(t_tar4.x, t_tar4.y, t_tar4.z);
+
+	// Done turning, reset values
+	Input::InputHelper::GetInstance()->m_deltaPixelsX = 0;
+	Input::InputHelper::GetInstance()->m_deltaPixelsY = 0;
+	
 }
 

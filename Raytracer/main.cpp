@@ -27,9 +27,9 @@ GLuint g_textureHandle;
 
 /// Shader programs
 // Used to render the final picture
-GLuint g_renderProgramHandle; 
+GLuint g_renderProgramHandle;
 // Used to actually compute the frame
-GLuint g_computeProgramHandle; 
+GLuint g_computeProgramHandle;
 
 /// Other stuff
 Camera* g_camera;
@@ -49,13 +49,13 @@ void RenderScene()
 
 	// Start with compute shader
 	glUseProgram(g_computeProgramHandle);
-	
+
 	// Get it to rotate
-	float rotationspeed = 0.04 * turning;
-	mat4x4 t_rotationMatrix = rotate(rotationspeed, vec3(0, 1, 0));
-	vec4 t_camTar4 = t_rotationMatrix * vec4(g_camera->m_target, 0);
-	g_camera->m_target = normalize(vec3(t_camTar4.x, t_camTar4.y, t_camTar4.z));
-	
+	//float rotationspeed = 0.04 * turning;
+	//mat4x4 t_rotationMatrix = rotate(rotationspeed, vec3(0, 1, 0));
+	//vec4 t_camTar4 = t_rotationMatrix * vec4(g_camera->m_target, 0);
+	//g_camera->m_target = normalize(vec3(t_camTar4.x, t_camTar4.y, t_camTar4.z));
+
 	// Move it
 	//float moveSpeed = 0.001;
 	//vec3 moveDir = vec3(1, 0, 0);
@@ -89,20 +89,21 @@ void RenderScene()
 // Methods to handle keyboard input. Bound to glut callback
 void HandleKeyboardInputUp(unsigned char key, int x, int y)
 {
-    //cout << "up" << endl;
+	//cout << "up" << endl;
 	Input::InputHelper::GetInstance()->UpdateKeyDown(key);
 }
 
 void HandleKeyboardInputDown(unsigned char key, int x, int y)
 {
-    //cout << "down" << endl;
-    Input::InputHelper::GetInstance()->UpdateKeyUp(key);
+	//cout << "down" << endl;
+	Input::InputHelper::GetInstance()->UpdateKeyUp(key);
 }
 
 // Method to handle mouse input. Bound to glut callback
 void HandleMouseMovement(int x, int y)
 {
-
+	if (x != g_windowWidth / 2 && y != g_windowheight / 2)
+		Input::InputHelper::GetInstance()->WarpMouseToMiddle(x, y);
 }
 
 // Method to bind methods to glut callbacks
@@ -110,9 +111,9 @@ void InitializeGlutCallbacks()
 {
 	glutDisplayFunc(RenderScene);
 	glutIdleFunc(RenderScene);
-    // Keyboard callbacks seem inverted... glut is silly sometimes
+	// Keyboard callbacks seem inverted... glut is silly sometimes
 	glutKeyboardUpFunc(HandleKeyboardInputDown);
-    glutKeyboardFunc(HandleKeyboardInputUp);
+	glutKeyboardFunc(HandleKeyboardInputUp);
 	glutPassiveMotionFunc(HandleMouseMovement);
 }
 

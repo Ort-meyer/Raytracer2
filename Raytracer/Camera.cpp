@@ -1,5 +1,6 @@
 #include "Camera.h"
 
+#include "InputHelper.h"
 
 
 Camera::Camera(vec3 p_target, vec3 p_up, vec3 p_position)
@@ -51,5 +52,41 @@ mat4 Camera::GetViewProj()
 
 void Camera::Update()
 {
+    UpdatePosition();
+}
+
+void Camera::UpdatePosition()
+{
+    using namespace Input;
+    /// Check which keys/ are held down
+    // Forward and back
+    if (g_keysPressed & (int)Keys::W)
+    {
+        m_position += m_target * g_movementSpeed;
+    }
+
+    if (g_keysPressed & (int)Keys::S)
+    {
+        m_position -= m_target * g_movementSpeed;
+    }
+    // Sideways
+    // Get right vector to move along (Risky if we look too far up)
+    vec3 t_up = vec3(0, 1, 0);
+    vec3 t_right = cross(t_up, m_target);
+    t_right = normalize(t_right);
+    if (g_keysPressed & (int)Keys::A)
+    {
+        m_position += t_right * g_movementSpeed;
+    }
+
+    if (g_keysPressed & (int)Keys::D)
+    {
+        m_position -= t_right  * g_movementSpeed;
+    }
+}
+
+void Camera::UpdateRotation()
+{
 
 }
+

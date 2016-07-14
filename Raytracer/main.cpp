@@ -10,6 +10,7 @@
 // My own stuff
 #include "GlobalConstants.h"
 #include "GraphicsHelper.h"
+#include "InputHelper.h"
 #include "Camera.h"
 
 
@@ -48,7 +49,7 @@ void RenderScene()
 
 	// Start with compute shader
 	glUseProgram(g_computeProgramHandle);
-
+	
 	// Get it to rotate
 	float rotationspeed = 0.04 * turning;
 	mat4x4 t_rotationMatrix = rotate(rotationspeed, vec3(0, 1, 0));
@@ -85,13 +86,17 @@ void RenderScene()
 	turning = 0;
 }
 
-// Method to handle keyboard input. Bound to glut callback
-void HandleKeyboardInput(unsigned char key, int x, int y)
+// Methods to handle keyboard input. Bound to glut callback
+void HandleKeyboardInputUp(unsigned char key, int x, int y)
 {
-	if (key == 'a')
-		turning = 1;
-	else if (key == 'd')
-		turning = -1;
+    //cout << "up" << endl;
+    Input::UpdateKeyDown(key);
+}
+
+void HandleKeyboardInputDown(unsigned char key, int x, int y)
+{
+    //cout << "down" << endl;
+    Input::UpdateKeyUp(key);
 }
 
 // Method to handle mouse input. Bound to glut callback
@@ -105,14 +110,16 @@ void InitializeGlutCallbacks()
 {
 	glutDisplayFunc(RenderScene);
 	glutIdleFunc(RenderScene);
-	glutKeyboardUpFunc(HandleKeyboardInput);
+    // Keyboard callbacks seem inverted... glut is silly sometimes
+	glutKeyboardUpFunc(HandleKeyboardInputDown);
+    glutKeyboardFunc(HandleKeyboardInputUp);
 	glutPassiveMotionFunc(HandleMouseMovement);
 }
 
 // Main method
 int main(int argc, char** argv)
 {
-	
+
 
 	//Initialize glut stuff
 	glutInit(&argc, argv);

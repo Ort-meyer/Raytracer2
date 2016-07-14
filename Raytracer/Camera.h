@@ -31,9 +31,7 @@ public:
 
 	/*
 	Simple update-method where the attributes of the camera
-	get update.
-	WARNING! Hard-coded at the moment. Going to add parameters
-	and such later*/
+	get update.*/
 	void Update();
 	/*
 	Returns the view projection matrix.
@@ -61,5 +59,10 @@ private:
 
 	// Private variables to handle rotations. Debug-y.
 	float m_rotateAngle, m_horizonalAngle, m_verticalAngle;
+
+    float m_movementSpeed;
+
+    void UpdatePosition();
+    void UpdateRotation();
 };
 

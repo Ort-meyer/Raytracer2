@@ -109,7 +109,7 @@ Hitdata RayPwnSphere(vec3 rayPos, vec3 rayDir, vec3 spherePos, float sphereRad)
 	{
 		hitdata.t1 = -b - sqrt(f);
 		hitdata.t2 = -b + sqrt(f);
-	}
+}
 
 	return hitdata;
 }
@@ -120,7 +120,7 @@ void main()
 
 	vec4 sphere = vec4(0,0,2,0.2f);
 
-
+	
 	// vec3 position = vec3((gl_GlobalInvocationID.xy), 0);
 
 	//vec3 direction = RayDirection();
@@ -128,7 +128,7 @@ void main()
 	Ray ray = RayDirection();
 	vec3 direction = ray.dir;
 	ivec2 storePos = ivec2(gl_GlobalInvocationID.xy);
-	
+
 
 	//float hit = RayVsSphere(ray.dir, ray.pos, sphere);
 	//float hit = RayIntersectSphere(ray.dir, ray.pos, vec3(0,0,2), 0.1f);
@@ -160,7 +160,7 @@ void main()
 //
 
 //
-//
+//	
 
 
 

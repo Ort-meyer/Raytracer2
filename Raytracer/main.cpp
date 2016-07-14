@@ -13,6 +13,10 @@
 #include "Camera.h"
 
 
+
+static int turning = 0;
+
+
 ///////////// Global variables (master main)
 /// Textures
 // Main texture on which raytrace output is stored
@@ -38,13 +42,24 @@ void RenderScene()
 	// Update things
 	g_camera->Update(); // Does nothing so far...
 
-	/// Render things
+	/// Render things DO COMPUTE THINGIES
 	// Start with clearing the screen
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	// Start with compute shader
 	glUseProgram(g_computeProgramHandle);
+
+	// Get it to rotate
+	float rotationspeed = 0.04 * turning;
+	mat4x4 t_rotationMatrix = rotate(rotationspeed, vec3(0, 1, 0));
+	vec4 t_camTar4 = t_rotationMatrix * vec4(g_camera->m_target, 0);
+	g_camera->m_target = normalize(vec3(t_camTar4.x, t_camTar4.y, t_camTar4.z));
 	
+	// Move it
+	//float moveSpeed = 0.001;
+	//vec3 moveDir = vec3(1, 0, 0);
+	//g_camera->m_position += moveSpeed * moveDir;
+
 	// We use texture 0, our only texture. Will probably have to be changed in the future
 	glUniform1i(glGetUniformLocation(g_computeProgramHandle, "outputTexture"), g_textureHandle);
 	// Send position and direction of camera 
@@ -57,8 +72,9 @@ void RenderScene()
 	glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "ray01"), 1, &g_camera->m_frustum.ray01[0]);
 
 	// Start compute
-	//glDispatchCompute(1024 / 16, 768 / 16, 1);
 	glDispatchCompute(1024 / 16, 768 / 16, 1);
+
+	/// END COMPUTE THINGIES
 
 	// Render the results
 	glUseProgram(g_renderProgramHandle);
@@ -66,12 +82,16 @@ void RenderScene()
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
 	glutSwapBuffers();
+	turning = 0;
 }
 
 // Method to handle keyboard input. Bound to glut callback
 void HandleKeyboardInput(unsigned char key, int x, int y)
 {
-
+	if (key == 'a')
+		turning = 1;
+	else if (key == 'd')
+		turning = -1;
 }
 
 // Method to handle mouse input. Bound to glut callback
@@ -92,7 +112,7 @@ void InitializeGlutCallbacks()
 // Main method
 int main(int argc, char** argv)
 {
-
+	
 
 	//Initialize glut stuff
 	glutInit(&argc, argv);

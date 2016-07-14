@@ -6,19 +6,37 @@ Camera::Camera(vec3 p_target, vec3 p_up, vec3 p_position)
 	:m_target(normalize(p_target)), m_up(p_up), m_position(p_position)
 {
 	m_view = lookAt(m_position, m_target + m_position, m_up);
-	m_projection = perspectiveFov(90, g_windowWidth, g_windowheight, 0, 10000); // hard-coded zfar
-
+	m_projection = perspectiveFov(90.0f, 1024.0f, 768.0f, 0.5f, 10.0f); // hard-coded zfar
 	// UNUSED so far
 	m_rotateAngle = 0;
 	m_verticalAngle = 0;
 	m_horizonalAngle = 3.1415; // pi
 
 	// Image a unit-cope, and use the projectionmatrix to expand it into a frustum
-	m_frustum.ray00 = vec3(inverse(GetViewProj())*vec4(-1, -1, 1, 0));
-	m_frustum.ray10 = vec3(inverse(GetViewProj())*vec4(1, -1, 1, 0));
-	m_frustum.ray11 = vec3(inverse(GetViewProj())*vec4(1, 1, 1, 0));
-	m_frustum.ray01 = vec3(inverse(GetViewProj())*vec4(-1, 1, 1, 0));
+	//m_frustum.ray00 = vec3(inverse(GetViewProj())*vec4(-1, -1, 1, 0));
+	//m_frustum.ray10 = vec3(inverse(GetViewProj())*vec4(1, -1, 1, 0));
+	//m_frustum.ray11 = vec3(inverse(GetViewProj())*vec4(1, 1, 1, 0));
+	//m_frustum.ray01 = vec3(inverse(GetViewProj())*vec4(-1, 1, 1, 0));
 
+	//m_frustum.ray00 = vec3((GetViewProj())*vec4(-1, -1, 1, 0));
+	//m_frustum.ray10 = vec3((GetViewProj())*vec4(1, -1, 1, 0));
+	//m_frustum.ray11 = vec3((GetViewProj())*vec4(1, 1, 1, 0));
+	//m_frustum.ray01 = vec3((GetViewProj())*vec4(-1, 1, 1, 0));
+
+	//m_frustum.ray00 = vec3(inverse(m_projection) *vec4(-1, -1, 1, 0));
+	//m_frustum.ray10 = vec3(inverse(m_projection) *vec4(1, -1, 1, 0));	// <--- proper one
+	//m_frustum.ray11 = vec3(inverse(m_projection) *vec4(1, 1, 1, 0));
+	//m_frustum.ray01 = vec3(inverse(m_projection) *vec4(-1, 1, 1, 0));
+
+	m_frustum.ray00 = vec3(m_projection *vec4(-1, -1, 1, 0));
+	m_frustum.ray10 = vec3(m_projection *vec4(1, -1, 1, 0));	// <--- proper one
+	m_frustum.ray11 = vec3(m_projection *vec4(1, 1, 1, 0));
+	m_frustum.ray01 = vec3(m_projection *vec4(-1, 1, 1, 0));
+
+	//m_frustum.ray00 = vec3(inverse(m_projection) *vec4(-1, -1, 1, 0));
+	//m_frustum.ray10 = vec3(inverse(m_projection) *vec4(1, -1, 1, 0));
+	//m_frustum.ray11 = vec3(inverse(m_projection) *vec4(1, 1, 1, 0));
+	//m_frustum.ray01 = vec3(inverse(m_projection) *vec4(-1, 1, 1, 0));
 }
 
 Camera::~Camera()

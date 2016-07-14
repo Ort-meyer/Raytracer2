@@ -69,8 +69,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>D:\Skolgrejs\Raytracer\Raytracer\include;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\Skolgrejs\Raytracer\Raytracer\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\BOSS\Source\Repos\Raytracer2\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\BOSS\Source\Repos\Raytracer2\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>C:\Users\BOSS\Source\Repos\Raytracer2\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\BOSS\Source\Repos\Raytracer2\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

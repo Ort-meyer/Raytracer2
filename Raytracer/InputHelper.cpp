@@ -1,13 +1,20 @@
 #include "InputHelper.h"
 
+using namespace Input;
 
-void Input::UpdateKeyDown(char key)
+InputHelper* InputHelper::m_singleton = nullptr;
+
+InputHelper::InputHelper()
+{
+}
+
+void InputHelper::UpdateKeyDown(char key)
 {
     switch (key)
     {
     case 'w':
     case 'W':
-        g_keysPressed |= (int)Keys::W;
+		g_keysPressed |= (int)Keys::W;
         break;
 
     case 'a':
@@ -28,7 +35,7 @@ void Input::UpdateKeyDown(char key)
     }
 }
 
-void Input::UpdateKeyUp(char key)
+void InputHelper::UpdateKeyUp(char key)
 {
     switch (key)
     {
@@ -55,3 +62,17 @@ void Input::UpdateKeyUp(char key)
     }
 }
 
+
+InputHelper * InputHelper::GetInstance()
+{
+
+	if (m_singleton != nullptr)
+	{
+		return m_singleton;
+	}
+	else
+	{
+		m_singleton = new InputHelper();
+		return m_singleton;
+	}
+}

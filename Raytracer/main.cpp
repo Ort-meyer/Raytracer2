@@ -90,13 +90,13 @@ void RenderScene()
 void HandleKeyboardInputUp(unsigned char key, int x, int y)
 {
     //cout << "up" << endl;
-    Input::UpdateKeyDown(key);
+	Input::InputHelper::GetInstance()->UpdateKeyDown(key);
 }
 
 void HandleKeyboardInputDown(unsigned char key, int x, int y)
 {
     //cout << "down" << endl;
-    Input::UpdateKeyUp(key);
+    Input::InputHelper::GetInstance()->UpdateKeyUp(key);
 }
 
 // Method to handle mouse input. Bound to glut callback
@@ -119,8 +119,6 @@ void InitializeGlutCallbacks()
 // Main method
 int main(int argc, char** argv)
 {
-
-
 	//Initialize glut stuff
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);

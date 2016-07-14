@@ -12,6 +12,7 @@ Camera::Camera(vec3 p_target, vec3 p_up, vec3 p_position)
 	m_rotateAngle = 0;
 	m_verticalAngle = 0;
 	m_horizonalAngle = 3.1415; // pi
+	m_movementSpeed = 0.01f;
 
 	// Image a unit-cope, and use the projectionmatrix to expand it into a frustum
 	//m_frustum.ray00 = vec3(inverse(GetViewProj())*vec4(-1, -1, 1, 0));
@@ -58,30 +59,31 @@ void Camera::Update()
 void Camera::UpdatePosition()
 {
     using namespace Input;
+	InputHelper* t_inputHelper = InputHelper::GetInstance();
     /// Check which keys/ are held down
     // Forward and back
-    if (g_keysPressed & (int)Keys::W)
+    if (t_inputHelper->g_keysPressed & (int)Keys::W == (int)Keys::W)
     {
-        m_position += m_target * g_movementSpeed;
+        m_position += m_target * m_movementSpeed;
     }
 
-    if (g_keysPressed & (int)Keys::S)
+    if (t_inputHelper->g_keysPressed & (int)Keys::S)
     {
-        m_position -= m_target * g_movementSpeed;
+        m_position -= m_target * m_movementSpeed;
     }
     // Sideways
     // Get right vector to move along (Risky if we look too far up)
     vec3 t_up = vec3(0, 1, 0);
     vec3 t_right = cross(t_up, m_target);
     t_right = normalize(t_right);
-    if (g_keysPressed & (int)Keys::A)
+    if (t_inputHelper->g_keysPressed & (int)Keys::A)
     {
-        m_position += t_right * g_movementSpeed;
+        m_position += t_right * m_movementSpeed;
     }
 
-    if (g_keysPressed & (int)Keys::D)
+    if (t_inputHelper->g_keysPressed & (int)Keys::D)
     {
-        m_position -= t_right  * g_movementSpeed;
+        m_position -= t_right  * m_movementSpeed;
     }
 }
 

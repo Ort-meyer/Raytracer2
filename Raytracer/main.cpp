@@ -65,7 +65,6 @@ void RenderScene()
 	glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "ray11"), 1, &g_camera->m_frustum.ray11[0]);
 	glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "ray01"), 1, &g_camera->m_frustum.ray01[0]);
 
-
 	// Send in light positions
 	vector<vec3> lightPositions;
 	g_world->GetPointLightInfor(lightPositions);
@@ -76,9 +75,18 @@ void RenderScene()
 	vector<vec3> t_spherePositions;
 	vector<float> t_sphereRadii;
 	g_world->GetSphereInfo(t_spherePositions, t_sphereRadii);
-	glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "spherePositions"), t_spherePositions.size(), &t_spherePositions[0][0]);
-	glUniform1fv(glGetUniformLocation(g_computeProgramHandle, "sphereRadii"), t_sphereRadii.size(), &t_sphereRadii[0]);
-	glUniform1i(glGetUniformLocation(g_computeProgramHandle, "numSpheres"), t_spherePositions.size());
+	if (t_spherePositions.size() > 0)
+	{
+		glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "spherePositions"), t_spherePositions.size(), &t_spherePositions[0][0]);
+		glUniform1fv(glGetUniformLocation(g_computeProgramHandle, "sphereRadii"), t_sphereRadii.size(), &t_sphereRadii[0]);
+		glUniform1i(glGetUniformLocation(g_computeProgramHandle, "numSpheres"), t_spherePositions.size());
+	}
+
+	// Send in triangles
+	vector<vec3> t_trianglePositions;
+	g_world->GetTriangleInfo(t_trianglePositions);
+	glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "trianglePositions"), t_trianglePositions.size(), &t_trianglePositions[0][0]);
+	glUniform1i(glGetUniformLocation(g_computeProgramHandle, "numTriangles"), t_trianglePositions.size());
 
 	// Start compute
 	glDispatchCompute(1024 / 16, 768 / 16, 1);

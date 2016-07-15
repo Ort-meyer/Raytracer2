@@ -17,9 +17,13 @@ uniform vec3[50] lightPositions;
 uniform int numLights;
 
 //Spheres
-uniform vec3[5] spherePositions;
+uniform vec3[5] spherePositions; // Maximum of of 5 spheres
 uniform float[5] sphereRadii;
 uniform int numSpheres;
+
+//Triangles
+uniform vec3[3*4] trianglePositions; // 3 corners times maximum of 4 triangles
+uniform int numTriangles;
 
 
 // Hardcoded up-vector. used to figure out specific ups
@@ -105,10 +109,10 @@ Hitdata RayPwnSphere(vec3 rayPos, vec3 rayDir, vec3 spherePos, float sphereRad)
 	return hitdata;
 }
 // taken from http://stackoverflow.com/questions/13655457/raytracing-ray-triangle-intersection
-Hitdata RayPwnTriangle(Ray ray, Triangle triangle, Hitdata hitdata)
+Hitdata RayPwnTriangle(Ray ray, vec3 p0, vec3 p1, vec3 p2, Hitdata hitdata)
 {
-	vec3 e1 = triangle.p1 - triangle.p0;
-	vec3 e2 = triangle.p2 - triangle.p0;
+	vec3 e1 = p1 - p0;
+	vec3 e2 = p2 - p0;
 	vec3 e1e2 = cross(e1, e2);
 	vec3 p = cross(ray.dir, e2);
 	e1e2 = normalize(e1e2);
@@ -119,7 +123,7 @@ Hitdata RayPwnTriangle(Ray ray, Triangle triangle, Hitdata hitdata)
 	}
 
 	float f = 1 / a;
-	vec3 s = ray.pos - triangle.p0;
+	vec3 s = ray.pos - p0;
 	float u = f*(dot(s, p));
 	if(u < 0.0 || u > 1.0)
 	{
@@ -162,6 +166,8 @@ float CalculatePointLightLighting(Hitdata hitdata)
 	return lightFactorColor;
 }
 
+
+
 void main()
 {
 	// Get this pixels ray
@@ -171,7 +177,7 @@ void main()
 	hitdata.hit = false;
 	hitdata.hitDistance = 100000;
 
-	// Iterate through all spheres (hard-coded so far)
+	// Iterate through all spheres
 	for(int i = 0; i < numSpheres ; i++)
 	{
 		Hitdata t_hitdata = RayPwnSphere(ray.pos, ray.dir, spherePositions[i], sphereRadii[i]);
@@ -179,12 +185,16 @@ void main()
 			hitdata = t_hitdata;
 	}
 
-	//Triangle triangle;
-	//triangle.p0 = vec3(-0.4f, -0.4f, 1.0f) * 3;
-	//triangle.p1 = vec3(0.0f,0.4f,1.0f) * 3;
-	//triangle.p2 = vec3(0.4f, -0.4f, 1.0f) * 3;
-	//
-	//hitdata = RayPwnTriangle(ray, triangle, hitdata);
+	// Iterate through all triangles
+	for(int i = 0; i < numTriangles; i+=3)
+	{
+		Hitdata t_hitdata;
+		t_hitdata = RayPwnTriangle(ray, trianglePositions[i], trianglePositions[i+1], trianglePositions[i+2], t_hitdata);
+		if(t_hitdata.hit && hitdata.hitDistance > t_hitdata.hitDistance)
+			hitdata = t_hitdata;
+	}
+
+
 
 	// Calculate light based on hit
 	float lightValue = 0;
@@ -202,7 +212,7 @@ void main()
 	//	color = vec4(0,1,0,1);
 	//if(hitdata.position.x != 0)
 	//	color = vec4(1,0,0,1);
-
+	//color = vec4(hitdata.hit,0,0,1);
 	
 	ivec2 storePos = ivec2(gl_GlobalInvocationID.xy);
 	imageStore(destTex, storePos, color);

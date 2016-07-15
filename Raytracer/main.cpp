@@ -13,6 +13,7 @@
 #include "GraphicsHelper.h"
 #include "InputHelper.h"
 #include "Camera.h"
+#include "World.h"
 #include "PointLight.h"
 
 
@@ -34,8 +35,9 @@ GLuint g_computeProgramHandle;
 
 /// Other stuff
 Camera* g_camera;
+World* g_world;
 
-PointLight* g_pointLight;
+vector<PointLight*> g_pointLights;
 
 
 using namespace std;
@@ -46,7 +48,10 @@ void RenderScene()
 {
 	// Update things
 	g_camera->Update();
-	g_pointLight->UpdatePosition();
+	for (size_t i = 0; i < g_pointLights.size(); i++)
+	{
+		g_pointLights[i]->UpdatePosition();
+	}
 
 	/// Render things DO COMPUTE THINGIES
 	// Start with clearing the screen
@@ -76,8 +81,24 @@ void RenderScene()
 	glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "ray10"), 1, &g_camera->m_frustum.ray10[0]);
 	glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "ray11"), 1, &g_camera->m_frustum.ray11[0]);
 	glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "ray01"), 1, &g_camera->m_frustum.ray01[0]);
+
+
 	// Send in light positions
-	glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "lightPos"), 1, &g_pointLight->GetPosition()[0]);
+	vector<vec3> lightPositions;
+	for (size_t i = 0; i < g_pointLights.size(); i++)
+	{
+		lightPositions.push_back(g_pointLights[i]->GetPosition());
+	}
+	glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "lightPositions"), lightPositions.size(), &lightPositions[0][0]);
+	glUniform1i(glGetUniformLocation(g_computeProgramHandle, "numLights"), lightPositions.size());
+
+	// Send in spheres
+	vector<vec3> t_spherePositions;
+	vector<float> t_sphereRadii;
+	g_world->GetSphereInfo(t_spherePositions, t_sphereRadii);
+	glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "spherePositions"), t_spherePositions.size(), &t_spherePositions[0][0]);
+	glUniform1fv(glGetUniformLocation(g_computeProgramHandle, "sphereRadii"), t_sphereRadii.size(), &t_sphereRadii[0]);
+	glUniform1i(glGetUniformLocation(g_computeProgramHandle, "numSpheres"), t_spherePositions.size());
 
 	// Start compute
 	glDispatchCompute(1024 / 16, 768 / 16, 1);
@@ -128,8 +149,11 @@ void InitializeGlutCallbacks()
 void SetupLights()
 {
 	vector<vec3> t_waypoints;
-	t_waypoints.push_back(vec3(0, 0, 2.7));
-	g_pointLight = new PointLight(t_waypoints, vec3(1, 1, 1), 0.05);
+	t_waypoints.push_back(vec3(0, 0, 0));
+	g_pointLights.push_back(new PointLight(t_waypoints, vec3(1, 1, 1), 0));
+
+	t_waypoints[0] = vec3(0, -1, 2.7);
+	//g_pointLights.push_back(new PointLight(t_waypoints, vec3(1, 1, 1), 0.002));
 }
 
 // Main method
@@ -150,6 +174,7 @@ int main(int argc, char** argv)
 	}
 
 	glClearColor(0, 0, 0, 0);
+	glutSetCursor(GLUT_CURSOR_NONE);
 
 	/// My stuff before starting the main loop
 	// Load basic render shader
@@ -169,6 +194,9 @@ int main(int argc, char** argv)
 
 	// Create the camera
 	g_camera = new Camera(vec3(0, 0, 1), vec3(0, 1, 0), vec3(0, 0, 0));
+
+	// CreateWorld
+	g_world = new World();
 	
 	// Create lights
 	SetupLights();

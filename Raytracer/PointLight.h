@@ -28,5 +28,8 @@ private:
 	float m_moveSpeed;
 	vector<vec3> m_waypoints;
 	int m_currentWaypoint;
+
+	// Temporary movement stuff
+	float m_movement;
 };
 

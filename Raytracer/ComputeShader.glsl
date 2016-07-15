@@ -12,11 +12,18 @@ uniform vec3 ray01;
 layout(binding=0,rgba8) uniform image2D destTex;
 layout (local_size_x = 16, local_size_y = 16) in;
 
+//Lights
+uniform vec3[50] lightPositions;
+uniform int numLights;
+
+//Spheres
+uniform vec3[5] spherePositions;
+uniform float[5] sphereRadii;
+uniform int numSpheres;
+
+
 // Hardcoded up-vector. used to figure out specific ups
 vec3 cameraUp = vec3(0,1,0);
-
-//Lights
-uniform vec3 lightPos;
 
 
 struct Ray
@@ -67,6 +74,8 @@ Ray RayDirection() // used to return vec3
 
 // More or less copy pasted from 3D lab 1 
 // Kommer inte kunna lösa problem om vi har två objekt efter varandra 
+
+
 Hitdata RayPwnSphere(vec3 rayPos, vec3 rayDir, vec3 spherePos, float sphereRad)
 {
 	float b = dot(rayDir, rayPos - spherePos);
@@ -84,7 +93,14 @@ Hitdata RayPwnSphere(vec3 rayPos, vec3 rayDir, vec3 spherePos, float sphereRad)
 	{
 		hitdata.t1 = -b - sqrt(f);
 		hitdata.t2 = -b + sqrt(f);
-}
+	}
+	hitdata.hitDistance = hitdata.t1;
+	if(hitdata.t1 > hitdata.t2)
+		hitdata.hitDistance = hitdata.t2;
+
+	// Calculate position and normal
+	hitdata.position = rayPos + rayDir * hitdata.hitDistance;
+	hitdata.normal = normalize(hitdata.position - spherePos);
 
 	return hitdata;
 }
@@ -130,48 +146,65 @@ Hitdata RayPwnTriangle(Ray ray, Triangle triangle, Hitdata hitdata)
 
 float CalculatePointLightLighting(Hitdata hitdata)
 {
-	vec3 pointLight = lightPos;
-	vec3 lightFactor = pointLight - hitdata.position;
+	float lightFactorColor = 0;
+	for(int i = 0; i < numLights; i++)
+	{
+		vec3 pointLight = lightPositions[i];
+		vec3 lightFactor = pointLight - hitdata.position;
+		lightFactorColor += dot(normalize(hitdata.normal), normalize(lightFactor));
 
-	//return dot(vec3(0,0,1), vec3(0,0,1));
 
-	//return 0.5;
-	return dot(normalize(hitdata.normal), normalize(lightFactor));
+
+		//vec3 pointLight = lightPos;
+		//vec3 lightFactor = pointLight - hitdata.position;
+		//return dot(normalize(hitdata.normal), normalize(lightFactor));
+	}
+	return lightFactorColor;
 }
-
 
 void main()
 {
-
-	vec4 sphere = vec4(0,0,2,0.2f);
-
+	// Get this pixels ray
 	Ray ray = RayDirection();
-	vec3 direction = ray.dir;
-	ivec2 storePos = ivec2(gl_GlobalInvocationID.xy);
-
-	//Hitdata hitdata = RayPwnSphere(ray.pos, ray.dir, vec3(0,0,2), 0.2f);
-
-	Triangle triangle;
-	//triangle.p0 = vec3(-0.4f, -0.4f, 2.0f);
-	//triangle.p1 = vec3(0.0f,0.4f,2.0f);
-	//triangle.p2 = vec3(0.4f, -0.4f, 2.0f);
-	triangle.p0 = vec3(-0.4f, -0.4f, 1.0f) * 3;
-	triangle.p1 = vec3(0.0f,0.4f,1.0f) * 3;
-	triangle.p2 = vec3(0.4f, -0.4f, 1.0f) * 3;
-
+	// Declare hit data
 	Hitdata hitdata;
 	hitdata.hit = false;
-	hitdata = RayPwnTriangle(ray, triangle, hitdata);
+	hitdata.hitDistance = 100000;
 
+	// Iterate through all spheres (hard-coded so far)
+	for(int i = 0; i < numSpheres ; i++)
+	{
+		Hitdata t_hitdata = RayPwnSphere(ray.pos, ray.dir, spherePositions[i], sphereRadii[i]);
+		if(t_hitdata.hit && hitdata.hitDistance > t_hitdata.hitDistance)
+			hitdata = t_hitdata;
+	}
+
+	//Triangle triangle;
+	//triangle.p0 = vec3(-0.4f, -0.4f, 1.0f) * 3;
+	//triangle.p1 = vec3(0.0f,0.4f,1.0f) * 3;
+	//triangle.p2 = vec3(0.4f, -0.4f, 1.0f) * 3;
+	//
+	//hitdata = RayPwnTriangle(ray, triangle, hitdata);
+
+	// Calculate light based on hit
 	float lightValue = 0;
 	if(hitdata.hit)
 	{
 		lightValue = CalculatePointLightLighting(hitdata);
 	}
 
-	//vec4 color = vec4(hitdata.hit,0,0, 1);
-	vec4 color = vec4(lightValue,0,0, 1);
-	//vec4 color = vec4(hitdata.DEBUGcolor, 1);
+	// Store color
+	vec4 color;
+	color = vec4(lightValue,0,0, 1);
+	//if(hitdata.hit)
+	//	color = vec4(1,0,0,1);
+	//else
+	//	color = vec4(0,1,0,1);
+	//if(hitdata.position.x != 0)
+	//	color = vec4(1,0,0,1);
+
+	
+	ivec2 storePos = ivec2(gl_GlobalInvocationID.xy);
 	imageStore(destTex, storePos, color);
 }
 

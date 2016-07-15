@@ -134,6 +134,8 @@
     <ClCompile Include="InputHelper.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PointLight.cpp" />
+    <ClCompile Include="Sphere.cpp" />
+    <ClCompile Include="World.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
@@ -141,6 +143,8 @@
     <ClInclude Include="GraphicsHelper.h" />
     <ClInclude Include="InputHelper.h" />
     <ClInclude Include="PointLight.h" />
+    <ClInclude Include="Sphere.h" />
+    <ClInclude Include="World.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ComputeShader.glsl" />

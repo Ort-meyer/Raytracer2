@@ -28,6 +28,8 @@ struct Hitdata
 	float t2;
 	bool hit;
 	float hitDistance;
+	vec3 normal;
+	vec3 position;
 	vec3 DEBUGcolor;
 };
 
@@ -111,13 +113,27 @@ Hitdata RayPwnTriangle(Ray ray, Triangle triangle, Hitdata hitdata)
 		return hitdata;
 		
 	}
+
+
 	float t = f * dot(e2, q);
 
 	hitdata.hitDistance = t;
-	// hitdata.normal = e1e2;
-	// hitdata.position = hitdata.position * t;
+	hitdata.normal = e1e2;
+	hitdata.position = ray.pos + ray.dir * t;
 	hitdata.hit = true;
 	return hitdata;
+}
+
+
+float CalculatePointLightLighting(Hitdata hitdata)
+{
+	vec3 pointLight = vec3(0,0,1.9);
+	vec3 lightFactor = pointLight - hitdata.position;
+
+	//return dot(vec3(0,0,1), vec3(0,0,1));
+
+	//return 0.5;
+	return dot(normalize(hitdata.normal), normalize(lightFactor));
 }
 
 
@@ -141,7 +157,14 @@ void main()
 	hitdata.hit = false;
 	hitdata = RayPwnTriangle(ray, triangle, hitdata);
 
-	vec4 color = vec4(hitdata.hit,0,0, 1);
+	float lightValue = 0;
+	if(hitdata.hit)
+	{
+		lightValue = CalculatePointLightLighting(hitdata);
+	}
+
+	//vec4 color = vec4(hitdata.hit,0,0, 1);
+	vec4 color = vec4(lightValue,0,0, 1);
 	//vec4 color = vec4(hitdata.DEBUGcolor, 1);
 	imageStore(destTex, storePos, color);
 }

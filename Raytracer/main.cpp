@@ -1,5 +1,6 @@
 // Standard libraries
 #include <iostream>
+#include <vector>
 
 // 3rd party libraries
 #include <GL\glew.h>
@@ -12,7 +13,7 @@
 #include "GraphicsHelper.h"
 #include "InputHelper.h"
 #include "Camera.h"
-
+#include "PointLight.h"
 
 
 static int turning = 0;
@@ -34,6 +35,9 @@ GLuint g_computeProgramHandle;
 /// Other stuff
 Camera* g_camera;
 
+PointLight* g_pointLight;
+
+
 using namespace std;
 
 /// Methods used to control the program
@@ -41,7 +45,8 @@ using namespace std;
 void RenderScene()
 {
 	// Update things
-	g_camera->Update(); // Does nothing so far...
+	g_camera->Update();
+	g_pointLight->UpdatePosition();
 
 	/// Render things DO COMPUTE THINGIES
 	// Start with clearing the screen
@@ -71,6 +76,8 @@ void RenderScene()
 	glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "ray10"), 1, &g_camera->m_frustum.ray10[0]);
 	glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "ray11"), 1, &g_camera->m_frustum.ray11[0]);
 	glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "ray01"), 1, &g_camera->m_frustum.ray01[0]);
+	// Send in light positions
+	glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "lightPos"), 1, &g_pointLight->GetPosition()[0]);
 
 	// Start compute
 	glDispatchCompute(1024 / 16, 768 / 16, 1);
@@ -117,6 +124,14 @@ void InitializeGlutCallbacks()
 	glutPassiveMotionFunc(HandleMouseMovement);
 }
 
+// Creates all our lights in the world
+void SetupLights()
+{
+	vector<vec3> t_waypoints;
+	t_waypoints.push_back(vec3(0, 0, 2.7));
+	g_pointLight = new PointLight(t_waypoints, vec3(1, 1, 1), 0.05);
+}
+
 // Main method
 int main(int argc, char** argv)
 {
@@ -154,6 +169,9 @@ int main(int argc, char** argv)
 
 	// Create the camera
 	g_camera = new Camera(vec3(0, 0, 1), vec3(0, 1, 0), vec3(0, 0, 0));
+	
+	// Create lights
+	SetupLights();
 
 	glutMainLoop();
 

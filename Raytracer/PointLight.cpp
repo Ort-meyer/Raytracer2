@@ -24,7 +24,7 @@ void PointLight::UpdatePosition()
 	// TEMPORARY STUFF
 	static float t_movement;
 	t_movement += m_moveSpeed;
-	m_position += sin(t_movement) * vec3(1, 0, 0);
+	m_position = m_waypoints[0] + sin(t_movement) * vec3(1, 0, 0);
 }
 
 vec3 PointLight::GetPosition()

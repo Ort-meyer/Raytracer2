@@ -15,6 +15,9 @@ layout (local_size_x = 16, local_size_y = 16) in;
 // Hardcoded up-vector. used to figure out specific ups
 vec3 cameraUp = vec3(0,1,0);
 
+//Lights
+uniform vec3 lightPos;
+
 
 struct Ray
 {
@@ -127,7 +130,7 @@ Hitdata RayPwnTriangle(Ray ray, Triangle triangle, Hitdata hitdata)
 
 float CalculatePointLightLighting(Hitdata hitdata)
 {
-	vec3 pointLight = vec3(0,0,1.9);
+	vec3 pointLight = lightPos;
 	vec3 lightFactor = pointLight - hitdata.position;
 
 	//return dot(vec3(0,0,1), vec3(0,0,1));
@@ -149,9 +152,12 @@ void main()
 	//Hitdata hitdata = RayPwnSphere(ray.pos, ray.dir, vec3(0,0,2), 0.2f);
 
 	Triangle triangle;
-	triangle.p0 = vec3(-0.4f, -0.4f, 2.0f);
-	triangle.p1 = vec3(0.0f,0.4f,2.0f);
-	triangle.p2 = vec3(0.4f, -0.4f, 2.0f);
+	//triangle.p0 = vec3(-0.4f, -0.4f, 2.0f);
+	//triangle.p1 = vec3(0.0f,0.4f,2.0f);
+	//triangle.p2 = vec3(0.4f, -0.4f, 2.0f);
+	triangle.p0 = vec3(-0.4f, -0.4f, 1.0f) * 3;
+	triangle.p1 = vec3(0.0f,0.4f,1.0f) * 3;
+	triangle.p2 = vec3(0.4f, -0.4f, 1.0f) * 3;
 
 	Hitdata hitdata;
 	hitdata.hit = false;

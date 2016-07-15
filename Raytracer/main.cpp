@@ -37,9 +37,6 @@ GLuint g_computeProgramHandle;
 Camera* g_camera;
 World* g_world;
 
-vector<PointLight*> g_pointLights;
-
-
 using namespace std;
 
 /// Methods used to control the program
@@ -48,10 +45,7 @@ void RenderScene()
 {
 	// Update things
 	g_camera->Update();
-	for (size_t i = 0; i < g_pointLights.size(); i++)
-	{
-		g_pointLights[i]->UpdatePosition();
-	}
+	g_world->UpdateWorld();
 
 	/// Render things DO COMPUTE THINGIES
 	// Start with clearing the screen
@@ -59,17 +53,6 @@ void RenderScene()
 
 	// Start with compute shader
 	glUseProgram(g_computeProgramHandle);
-
-	// Get it to rotate
-	//float rotationspeed = 0.04 * turning;
-	//mat4x4 t_rotationMatrix = rotate(rotationspeed, vec3(0, 1, 0));
-	//vec4 t_camTar4 = t_rotationMatrix * vec4(g_camera->m_target, 0);
-	//g_camera->m_target = normalize(vec3(t_camTar4.x, t_camTar4.y, t_camTar4.z));
-
-	// Move it
-	//float moveSpeed = 0.001;
-	//vec3 moveDir = vec3(1, 0, 0);
-	//g_camera->m_position += moveSpeed * moveDir;
 
 	// We use texture 0, our only texture. Will probably have to be changed in the future
 	glUniform1i(glGetUniformLocation(g_computeProgramHandle, "outputTexture"), g_textureHandle);
@@ -85,10 +68,7 @@ void RenderScene()
 
 	// Send in light positions
 	vector<vec3> lightPositions;
-	for (size_t i = 0; i < g_pointLights.size(); i++)
-	{
-		lightPositions.push_back(g_pointLights[i]->GetPosition());
-	}
+	g_world->GetPointLightInfor(lightPositions);
 	glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "lightPositions"), lightPositions.size(), &lightPositions[0][0]);
 	glUniform1i(glGetUniformLocation(g_computeProgramHandle, "numLights"), lightPositions.size());
 
@@ -145,17 +125,6 @@ void InitializeGlutCallbacks()
 	glutPassiveMotionFunc(HandleMouseMovement);
 }
 
-// Creates all our lights in the world
-void SetupLights()
-{
-	vector<vec3> t_waypoints;
-	t_waypoints.push_back(vec3(0, 0, 0));
-	g_pointLights.push_back(new PointLight(t_waypoints, vec3(1, 1, 1), 0));
-
-	t_waypoints[0] = vec3(0, -1, 2.7);
-	//g_pointLights.push_back(new PointLight(t_waypoints, vec3(1, 1, 1), 0.002));
-}
-
 // Main method
 int main(int argc, char** argv)
 {
@@ -197,9 +166,6 @@ int main(int argc, char** argv)
 
 	// CreateWorld
 	g_world = new World();
-	
-	// Create lights
-	SetupLights();
 
 	glutMainLoop();
 

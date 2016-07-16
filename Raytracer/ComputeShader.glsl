@@ -22,7 +22,7 @@ uniform float[5] sphereRadii;
 uniform int numSpheres;
 
 //Triangles
-uniform vec3[3*4] trianglePositions; // 3 corners times maximum of 4 triangles
+uniform vec3[3*10] trianglePositions; // 3 corners times maximum of 10 triangles
 uniform int numTriangles;
 
 
@@ -156,7 +156,8 @@ float CalculatePointLightLighting(Hitdata hitdata)
 		vec3 pointLight = lightPositions[i];
 		vec3 lightFactor = pointLight - hitdata.position;
 		lightFactorColor += dot(normalize(hitdata.normal), normalize(lightFactor));
-
+		float inverseLightStrength = 0.2;
+		//lightFactorColor *= 1 - length(lightFactor) * inverseLightStrength; // This is for light cutoff
 
 
 		//vec3 pointLight = lightPos;
@@ -206,15 +207,9 @@ void main()
 	// Store color
 	vec4 color;
 	color = vec4(lightValue,0,0, 1);
-	//if(hitdata.hit)
-	//	color = vec4(1,0,0,1);
-	//else
-	//	color = vec4(0,1,0,1);
-	//if(hitdata.position.x != 0)
-	//	color = vec4(1,0,0,1);
-	//color = vec4(hitdata.hit,0,0,1);
-	
+
 	ivec2 storePos = ivec2(gl_GlobalInvocationID.xy);
+	storePos.y = 768 - storePos.y;
 	imageStore(destTex, storePos, color);
 }
 

@@ -14,31 +14,15 @@ Camera::Camera(vec3 p_target, vec3 p_up, vec3 p_position)
 	m_movementSpeed = 0.01f;
 	m_turnSpeed = 0.0001f;
 
-	// Image a unit-cope, and use the projectionmatrix to expand it into a frustum
-	//m_frustum.ray00 = vec3(inverse(GetViewProj())*vec4(-1, -1, 1, 0));
-	//m_frustum.ray10 = vec3(inverse(GetViewProj())*vec4(1, -1, 1, 0));
-	//m_frustum.ray11 = vec3(inverse(GetViewProj())*vec4(1, 1, 1, 0));
-	//m_frustum.ray01 = vec3(inverse(GetViewProj())*vec4(-1, 1, 1, 0));
-
-	//m_frustum.ray00 = vec3((GetViewProj())*vec4(-1, -1, 1, 0));
-	//m_frustum.ray10 = vec3((GetViewProj())*vec4(1, -1, 1, 0));
-	//m_frustum.ray11 = vec3((GetViewProj())*vec4(1, 1, 1, 0));
-	//m_frustum.ray01 = vec3((GetViewProj())*vec4(-1, 1, 1, 0));
-
-	//m_frustum.ray00 = vec3(inverse(m_projection) *vec4(-1, -1, 1, 0));
-	//m_frustum.ray10 = vec3(inverse(m_projection) *vec4(1, -1, 1, 0));	// <--- proper one
-	//m_frustum.ray11 = vec3(inverse(m_projection) *vec4(1, 1, 1, 0));
-	//m_frustum.ray01 = vec3(inverse(m_projection) *vec4(-1, 1, 1, 0));
+	//m_frustum.ray00 = vec3(m_projection *vec4(-1, -1, 1, 0));
+	//m_frustum.ray10 = vec3(m_projection *vec4(1, -1, 1, 0));	// <--- proper one
+	//m_frustum.ray11 = vec3(m_projection *vec4(1, 1, 1, 0));
+	//m_frustum.ray01 = vec3(m_projection *vec4(-1, 1, 1, 0));
 
 	m_frustum.ray00 = vec3(m_projection *vec4(-1, -1, 1, 0));
 	m_frustum.ray10 = vec3(m_projection *vec4(1, -1, 1, 0));	// <--- proper one
 	m_frustum.ray11 = vec3(m_projection *vec4(1, 1, 1, 0));
 	m_frustum.ray01 = vec3(m_projection *vec4(-1, 1, 1, 0));
-
-	//m_frustum.ray00 = vec3(inverse(m_projection) *vec4(-1, -1, 1, 0));
-	//m_frustum.ray10 = vec3(inverse(m_projection) *vec4(1, -1, 1, 0));
-	//m_frustum.ray11 = vec3(inverse(m_projection) *vec4(1, 1, 1, 0));
-	//m_frustum.ray01 = vec3(inverse(m_projection) *vec4(-1, 1, 1, 0));
 }
 
 Camera::~Camera()
@@ -96,7 +80,7 @@ void Camera::UpdateRotation()
 	float t_angleY = InputHelper::GetInstance()->m_deltaPixelsY * m_turnSpeed;
 
 	mat4x4 t_rotationX = rotate(t_angleX, vec3(0, 1, 0));
-	mat4x4 t_rotationY = rotate(-t_angleY, vec3(1, 0, 0));
+	mat4x4 t_rotationY = rotate(t_angleY, vec3(1, 0, 0));
 
 
 	vec4 t_tar4 = t_rotationX * t_rotationY * vec4(m_target, 0);

@@ -34,6 +34,7 @@ struct Ray
 {
 	vec3 dir;
 	vec3 pos;
+	bool DEBUG;
 };
 
 struct Hitdata
@@ -44,7 +45,8 @@ struct Hitdata
 	float hitDistance;
 	vec3 normal;
 	vec3 position;
-	vec3 DEBUGcolor;
+	bool hitTriangle; // debuggy
+	int hitIndex; // debuggy
 };
 
 // Copy pasted from 3D lab 1
@@ -98,13 +100,18 @@ Hitdata RayPwnSphere(vec3 rayPos, vec3 rayDir, vec3 spherePos, float sphereRad)
 		hitdata.t1 = -b - sqrt(f);
 		hitdata.t2 = -b + sqrt(f);
 	}
-	hitdata.hitDistance = hitdata.t1;
-	if(hitdata.t1 > hitdata.t2)
-		hitdata.hitDistance = hitdata.t2;
+	if(hitdata.t1 > 0 && hitdata.t2 > 0) // Does not work if we're inside a sphere
+	{	
+		hitdata.hitDistance = hitdata.t1;
+		if(hitdata.t1 > hitdata.t2)
+			hitdata.hitDistance = hitdata.t2;
 
-	// Calculate position and normal
-	hitdata.position = rayPos + rayDir * hitdata.hitDistance;
-	hitdata.normal = normalize(hitdata.position - spherePos);
+		// Calculate position and normal
+		hitdata.position = rayPos + rayDir * hitdata.hitDistance;
+		hitdata.normal = normalize(hitdata.position - spherePos);
+	}
+	else
+		hitdata.hit = false;
 
 	return hitdata;
 }
@@ -143,33 +150,13 @@ Hitdata RayPwnTriangle(Ray ray, vec3 p0, vec3 p1, vec3 p2, Hitdata hitdata)
 	hitdata.hitDistance = t;
 	hitdata.normal = e1e2;
 	hitdata.position = ray.pos + ray.dir * t;
-	hitdata.hit = true;
+	if(hitdata.hitDistance > 0)
+		hitdata.hit = true;
 	return hitdata;
 }
 
-
-float CalculatePointLightLighting(Hitdata hitdata)
-{
-	float lightFactorColor = 0;
-	for(int i = 0; i < numLights; i++)
-	{
-		// First, see if there's anything in the way.
-		vec3 pointLight = lightPositions[i];
-		vec3 lightFactor = pointLight - hitdata.position;
-		lightFactorColor += dot(normalize(hitdata.normal), normalize(lightFactor));
-		float inverseLightStrength = 0.2;
-		//lightFactorColor *= 1 - length(lightFactor) * inverseLightStrength; // This is for light cutoff
-
-
-		//vec3 pointLight = lightPos;
-		//vec3 lightFactor = pointLight - hitdata.position;
-		//return dot(normalize(hitdata.normal), normalize(lightFactor));
-	}
-	return lightFactorColor;
-}
-
 // Big method that iterates through each geometry and returns hit data for the object we hit
-Hitdata ComputeHit(Ray ray)
+Hitdata ComputeHit(Ray ray, Hitdata p_hitdata, bool shadow)
 {
 	Hitdata hitdata;
 	hitdata.hit = false;
@@ -178,36 +165,93 @@ Hitdata ComputeHit(Ray ray)
 	// Iterate through all spheres
 	for(int i = 0; i < numSpheres ; i++)
 	{
-		Hitdata t_hitdata = RayPwnSphere(ray.pos, ray.dir, spherePositions[i], sphereRadii[i]);
-		if(t_hitdata.hit && hitdata.hitDistance > t_hitdata.hitDistance)
-			hitdata = t_hitdata;
+		//if(!shadow || (shadow && p_hitdata.hitIndex != i))// && !p_hitdata.hitTriangle)) // This is ugly...
+		{
+	
+			Hitdata t_hitdata = RayPwnSphere(ray.pos, ray.dir, spherePositions[i], sphereRadii[i]);
+			if(t_hitdata.hit && hitdata.hitDistance > t_hitdata.hitDistance)
+			{
+				hitdata = t_hitdata;
+				hitdata.hitTriangle = false;
+				hitdata.hitIndex = i;
+			}
+		}
 	}
 
 	// Iterate through all triangles
 	for(int i = 0; i < numTriangles; i+=3)
 	{
-		Hitdata t_hitdata;
-		t_hitdata = RayPwnTriangle(ray, trianglePositions[i], trianglePositions[i+1], trianglePositions[i+2], t_hitdata);
-		if(t_hitdata.hit && hitdata.hitDistance > t_hitdata.hitDistance)
-			hitdata = t_hitdata;
+		//if(!shadow || (shadow && p_hitdata.hitIndex != i && p_hitdata.hitTriangle))
+		{
+			Hitdata t_hitdata;
+			t_hitdata = RayPwnTriangle(ray, trianglePositions[i], trianglePositions[i+1], trianglePositions[i+2], t_hitdata);
+			if(t_hitdata.hit && hitdata.hitDistance > t_hitdata.hitDistance)
+			{
+				hitdata = t_hitdata;
+				hitdata.hitTriangle = true;
+				hitdata.hitIndex = i;
+			}
+		}
 	}
 
 	return hitdata;
 }
+
+// Calculates light value of pixel
+float CalculatePointLightLighting(Hitdata hitdata, Ray ray)
+{
+	float lightFactorColor = 0;
+	for(int i = 0; i < numLights; i++)
+	{
+		// vector between light and where the ray hit an object
+		vec3 hitLightVector = lightPositions[i] - hitdata.position;
+		// "Angle" between hitLightVector and normal of hit
+		float normalLightDot = dot(hitdata.normal, hitLightVector);
+		
+		// Check if hit is on the "right side" of the light
+		if(normalLightDot > 0)
+		{		
+			// First, see if there's anything in the way.
+			Ray shadowRay;
+			shadowRay.dir = normalize(hitLightVector);
+			//shadowRay.dir = vec3(0,0,-1);
+			shadowRay.pos = hitdata.position;
+			Hitdata shadowHitdata = ComputeHit(shadowRay, hitdata, true);
+		
+			if(shadowHitdata.hit)
+			{
+				lightFactorColor -= 0.2f;
+			}
+
+			// There wasn't anything in the way
+			else
+			{
+				// Wasn't anything in the way. It's illuminated
+				float currentLightColorFactor = normalLightDot;
+				float inverseLightStrength = 0.001;
+				currentLightColorFactor *= 1 - length(hitLightVector) * inverseLightStrength; // This is for light cutoff
+				lightFactorColor += currentLightColorFactor;
+			}
+		}
+	}
+	return lightFactorColor;
+}
+
+
 
 
 void main()
 {
 	// Get this pixels ray
 	Ray ray = RayDirection();
-
-	Hitdata hitdata = ComputeHit(ray);
+	Hitdata derp;
+	Hitdata hitdata = ComputeHit(ray, derp, false);
 
 	// Calculate light based on hit
 	float lightValue = 0;
 	if(hitdata.hit)
 	{
-		lightValue = CalculatePointLightLighting(hitdata);
+		lightValue = CalculatePointLightLighting(hitdata, ray);
 	}
 
 	// Store color

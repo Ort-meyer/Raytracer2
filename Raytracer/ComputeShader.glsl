@@ -153,6 +153,7 @@ float CalculatePointLightLighting(Hitdata hitdata)
 	float lightFactorColor = 0;
 	for(int i = 0; i < numLights; i++)
 	{
+		// First, see if there's anything in the way.
 		vec3 pointLight = lightPositions[i];
 		vec3 lightFactor = pointLight - hitdata.position;
 		lightFactorColor += dot(normalize(hitdata.normal), normalize(lightFactor));
@@ -167,13 +168,9 @@ float CalculatePointLightLighting(Hitdata hitdata)
 	return lightFactorColor;
 }
 
-
-
-void main()
+// Big method that iterates through each geometry and returns hit data for the object we hit
+Hitdata ComputeHit(Ray ray)
 {
-	// Get this pixels ray
-	Ray ray = RayDirection();
-	// Declare hit data
 	Hitdata hitdata;
 	hitdata.hit = false;
 	hitdata.hitDistance = 100000;
@@ -195,7 +192,16 @@ void main()
 			hitdata = t_hitdata;
 	}
 
+	return hitdata;
+}
 
+
+void main()
+{
+	// Get this pixels ray
+	Ray ray = RayDirection();
+
+	Hitdata hitdata = ComputeHit(ray);
 
 	// Calculate light based on hit
 	float lightValue = 0;

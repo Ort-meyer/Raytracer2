@@ -196,6 +196,57 @@ Hitdata ComputeHit(Ray ray, Hitdata p_hitdata, bool shadow)
 	return hitdata;
 }
 
+float CalculatePointLightLightingOnly(Hitdata hitdata, Ray ray)
+{
+	float lightFactorColor = 0.1; // some ambient
+	for(int i = 0; i < numLights; i++)
+	{
+		// vector between light and where the ray hit an object
+		vec3 hitLightVector = lightPositions[i] - hitdata.position;
+		// "Angle" between hitLightVector and normal of hit
+		float normalLightDot = dot(hitdata.normal, hitLightVector);
+		
+		// Check if hit is on the "right side" of the light
+		if(true)//normalLightDot > 0)
+		{
+			float inverseLightStrength = 0.145;
+			float currentLightColorFactor = normalLightDot;
+			currentLightColorFactor *= 1 - length(hitLightVector) * inverseLightStrength; // This is for light cutoff 
+			lightFactorColor += clamp(currentLightColorFactor, 0, 1);
+		}
+	}
+	// Ensure there's always ambience
+	lightFactorColor = clamp(lightFactorColor, 0.1f, 1.0f);
+	return lightFactorColor;
+}
+float CalculatePointLightShadowOnly(Hitdata hitdata, Ray ray)
+{
+
+	float lightFactorColor = 1;
+	for(int i = 0; i < numLights; i++)
+	{
+		// vector between light and where the ray hit an object
+		vec3 hitLightVector = lightPositions[i] - hitdata.position;
+		// "Angle" between hitLightVector and normal of hit
+		float normalLightDot = dot(hitdata.normal, hitLightVector);
+		if(normalLightDot > 0)
+		{
+			// First, see if there's anything in the way.
+			Ray shadowRay;
+			shadowRay.dir = normalize(hitLightVector);
+			shadowRay.pos = hitdata.position;
+			Hitdata shadowHitdata = ComputeHit(shadowRay, hitdata, true);
+			// Hitdata och hitdistance går inte alltid att lita på.
+			if(shadowHitdata.hit && length(shadowHitdata.position - shadowRay.pos) <= length(hitLightVector))
+			{
+				lightFactorColor *= 0.5; // How shadowy shadows become
+				
+			}
+		}
+	}
+	return lightFactorColor;
+}
+
 // Calculates light value of pixel
 // Light computation from http://gamedev.stackexchange.com/questions/56897/glsl-light-attenuation-color-and-intensity-formula
 float CalculatePointLightLighting(Hitdata hitdata, Ray ray)
@@ -214,15 +265,13 @@ float CalculatePointLightLighting(Hitdata hitdata, Ray ray)
 			// First, see if there's anything in the way.
 			Ray shadowRay;
 			shadowRay.dir = normalize(hitLightVector);
-			//shadowRay.dir = vec3(0,0,-1);
 			shadowRay.pos = hitdata.position;
 			Hitdata shadowHitdata = ComputeHit(shadowRay, hitdata, true);
 			// Hitdata och hitdistance går inte alltid att lita på.
 			if(shadowHitdata.hit && length(shadowHitdata.position - shadowRay.pos) <= length(hitLightVector))
 			{
-				lightFactorColor -= 0.7f; // How shadowy shadows become
-				if(lightFactorColor < 0.1)
-					lightFactorColor = 0.1;
+				lightFactorColor -= 0.7; // How shadowy shadows become
+				
 			}
 
 			// There wasn't anything in the way
@@ -246,15 +295,22 @@ float CalculatePointLightLighting(Hitdata hitdata, Ray ray)
 
 				else
 				{
+					float lightIntensity = clamp(normalLightDot, 0, 1);
+
+
+
 					// Wasn't anything in the way. It's illuminated
 					float currentLightColorFactor = normalLightDot;
-					float inverseLightStrength = 0.145;
+					float inverseLightStrength = 0.15;
 					currentLightColorFactor *= 1 - length(hitLightVector) * inverseLightStrength; // This is for light cutoff 
 					lightFactorColor += clamp(currentLightColorFactor, 0, 1);
 				}
 			}
 		}
+		
 	}
+	// Ensure there's always ambience
+	lightFactorColor = clamp(lightFactorColor, 0.1f, 1.0f);
 	return lightFactorColor;
 }
 
@@ -272,7 +328,9 @@ void main()
 	float lightValue = 0;
 	if(hitdata.hit)
 	{
-		lightValue = CalculatePointLightLighting(hitdata, ray);
+		//lightValue = CalculatePointLightLighting(hitdata, ray);
+		lightValue = CalculatePointLightLightingOnly(hitdata, ray);
+		lightValue *= CalculatePointLightShadowOnly(hitdata, ray);
 	}
 
 	// Store color

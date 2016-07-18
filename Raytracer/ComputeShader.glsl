@@ -217,8 +217,8 @@ float CalculatePointLightLighting(Hitdata hitdata, Ray ray)
 			//shadowRay.dir = vec3(0,0,-1);
 			shadowRay.pos = hitdata.position;
 			Hitdata shadowHitdata = ComputeHit(shadowRay, hitdata, true);
-		
-			if(shadowHitdata.hit)
+			// Hitdata och hitdistance går inte alltid att lita på.
+			if(shadowHitdata.hit && length(shadowHitdata.position - shadowRay.pos) <= length(hitLightVector))
 			{
 				lightFactorColor -= 0.7f; // How shadowy shadows become
 				if(lightFactorColor < 0.1)

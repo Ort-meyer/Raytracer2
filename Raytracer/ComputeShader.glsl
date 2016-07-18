@@ -144,7 +144,6 @@ Hitdata RayPwnTriangle(Ray ray, vec3 p0, vec3 p1, vec3 p2, Hitdata hitdata)
 		
 	}
 
-
 	float t = f * dot(e2, q);
 
 	hitdata.hitDistance = t;
@@ -228,7 +227,7 @@ float CalculatePointLightLighting(Hitdata hitdata, Ray ray)
 			{
 				// Wasn't anything in the way. It's illuminated
 				float currentLightColorFactor = normalLightDot;
-				float inverseLightStrength = 0.001;
+				float inverseLightStrength = 0.2;
 				currentLightColorFactor *= 1 - length(hitLightVector) * inverseLightStrength; // This is for light cutoff
 				lightFactorColor += currentLightColorFactor;
 			}

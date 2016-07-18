@@ -197,9 +197,10 @@ Hitdata ComputeHit(Ray ray, Hitdata p_hitdata, bool shadow)
 }
 
 // Calculates light value of pixel
+// Light computation from http://gamedev.stackexchange.com/questions/56897/glsl-light-attenuation-color-and-intensity-formula
 float CalculatePointLightLighting(Hitdata hitdata, Ray ray)
 {
-	float lightFactorColor = 0;
+	float lightFactorColor = 0.1; // some ambient
 	for(int i = 0; i < numLights; i++)
 	{
 		// vector between light and where the ray hit an object
@@ -219,17 +220,38 @@ float CalculatePointLightLighting(Hitdata hitdata, Ray ray)
 		
 			if(shadowHitdata.hit)
 			{
-				lightFactorColor -= 0.2f;
+				lightFactorColor -= 0.7f; // How shadowy shadows become
+				if(lightFactorColor < 0.1)
+					lightFactorColor = 0.1;
 			}
 
 			// There wasn't anything in the way
 			else
 			{
-				// Wasn't anything in the way. It's illuminated
-				float currentLightColorFactor = normalLightDot;
-				float inverseLightStrength = 0.2;
-				currentLightColorFactor *= 1 - length(hitLightVector) * inverseLightStrength; // This is for light cutoff
-				lightFactorColor += currentLightColorFactor;
+				if(false)
+				{
+					float cutoffDistance = 5;
+					float lightDistance = length(hitLightVector);
+					if(lightDistance < 1000)
+					{
+						float aFactor = 0.1;
+						float bFactor = 0.01;
+						float cFactor = 0.4;
+						float attenuation = 1 / (1 + aFactor * lightDistance + bFactor * lightDistance * lightDistance);
+						float dcont = max(0.0, normalLightDot);
+						lightFactorColor += attenuation * (dcont+cFactor);
+					}
+				}
+
+
+				else
+				{
+					// Wasn't anything in the way. It's illuminated
+					float currentLightColorFactor = normalLightDot;
+					float inverseLightStrength = 0.145;
+					currentLightColorFactor *= 1 - length(hitLightVector) * inverseLightStrength; // This is for light cutoff 
+					lightFactorColor += clamp(currentLightColorFactor, 0, 1);
+				}
 			}
 		}
 	}

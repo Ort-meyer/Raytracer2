@@ -11,7 +11,7 @@ Camera::Camera(vec3 p_target, vec3 p_up, vec3 p_position)
 	m_rotateAngle = 0;
 	m_verticalAngle = 0;
 	m_horizonalAngle = 3.1415; // pi
-	m_movementSpeed = 0.01f;
+	m_movementSpeed = 0.04f;
 	m_turnSpeed = 0.0001f;
 
 	//m_frustum.ray00 = vec3(m_projection *vec4(-1, -1, 1, 0));

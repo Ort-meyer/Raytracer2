@@ -12,7 +12,7 @@ class PointLight
 {
 public:
 	PointLight();
-	PointLight(vector<vec3>p_waypoints, vec3 p_color, float p_moveSpeed);
+	PointLight(vector<vec3>p_waypoints, vec3 p_color, float p_moveSpeed, vec3 p_movementVector);
 	~PointLight();
 
 	void UpdatePosition();
@@ -27,6 +27,7 @@ private:
 	// Patrol stuff. Might be changed later
 	float m_moveSpeed;
 	vector<vec3> m_waypoints;
+	vec3 m_movementVector;
 	int m_currentWaypoint;
 
 	// Temporary movement stuff

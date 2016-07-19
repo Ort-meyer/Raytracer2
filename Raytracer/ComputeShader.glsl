@@ -26,8 +26,8 @@ uniform vec3 [5] sphereColors;
 uniform int numSpheres;
 
 //Triangles
-uniform vec3[3*10] trianglePositions; // 3 corners times maximum of 10 triangles
-uniform vec3[10] triangleColors;
+uniform vec3[3*40] trianglePositions; // 3 corners times maximum of 10 triangles
+uniform vec3[40] triangleColors;
 uniform int numTrianglePositions;
 
 
@@ -335,7 +335,7 @@ float CalculatePointLightLighting(Hitdata hitdata, Ray ray)
 		
 	}
 	// Ensure there's always ambience
-	lightFactorColor = clamp(lightFactorColor, 0.1f, 1.0f);
+	lightFactorColor = clamp(lightFactorColor, 0.4f, 1.0f);
 	return lightFactorColor;
 }
 

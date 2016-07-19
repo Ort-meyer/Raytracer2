@@ -225,8 +225,36 @@ float CalculatePointLightLightingOnly(Hitdata hitdata, Ray ray)
 	}
 	for(int i = 0; i<numDiffuseLights; i++)
 	{
+
+
+		float diffuseIntensity = 0.6;
+		float specularPower = 4;
+		float matSpecularIntensity = 0.4;
+		
+		float specularValue = 0;
+		// First calculate diffuse value
+		float diffuseValue = dot(diffuseLightingDirections[i],hitdata.normal);
+		if(diffuseValue > 0)
+		{
+			diffuseValue *= diffuseIntensity;
+		
+			// Now calculate specular lighting
+			vec3 toEye = normalize(hitdata.position - ray.pos);
+			vec3 lightReflect = normalize(reflect(diffuseLightingDirections[i], hitdata.normal));
+		
+			specularValue = dot(toEye, lightReflect);
+			if(specularValue > 0 )
+			{
+				specularValue = matSpecularIntensity * pow(specularValue, specularPower);
+			}
+		}
+		
+		// Add them to total light
+		lightFactorColor += diffuseValue + clamp(specularValue, 0, 1);
+
+
 		// Alla diffuselights är starka
-		lightFactorColor += dot( diffuseLightingDirections[i],hitdata.normal);
+		//lightFactorColor += dot( diffuseLightingDirections[i],hitdata.normal);
 	}
 	// Ensure there's always ambience
 	lightFactorColor = clamp(lightFactorColor, 0.1f, 1.0f);

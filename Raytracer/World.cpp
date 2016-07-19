@@ -68,9 +68,9 @@ void World::GetDiffuseLighting(vector<vec3>& o_diffuseLightingDirections)
 void World::SetupWorld()
 {
 	// Diffuse lighting
-	m_diffuseLights.push_back(new DiffuseLight(vec3(1, -2, 0)));
+	m_diffuseLights.push_back(new DiffuseLight(vec3(0, 0, -1)));
 	// Setup spheres
-	m_spheres.push_back(new Sphere(vec3(0, -0.5, 0), vec3(0, 1, 0), 0.25f));
+	m_spheres.push_back(new Sphere(vec3(0, 0, 2), vec3(0, 1, 0), 0.25f));
 	m_spheres.push_back(new Sphere(vec3(0, 1, 0), vec3(0, 0, 1), 0.10f));
 
 
@@ -96,32 +96,6 @@ void World::SetupWorld()
 	// Setup triangles (should be done via obj later)
 
 	vector<vec3> t_corners;
-	// First debug triangle
-	//t_corners.clear();
-	//t_corners.push_back(vec3(-0.2f, 0, 1));
-	//t_corners.push_back(vec3(-0.2f, 0.2f, 2));
-	//t_corners.push_back(vec3(0.2f, 0, 1.5f));
-	//m_triangles.push_back(new Triangle(t_corners));
-	//// Times two due to strange backface culling thingy
-	//t_corners.clear();
-	//t_corners.push_back(vec3(0.2f, 0, 1.5f));
-	//t_corners.push_back(vec3(-0.2f, 0.2f, 2));
-	//t_corners.push_back(vec3(-0.2f, 0, 1));
-	//m_triangles.push_back(new Triangle(t_corners));
-
-
-	// Second debug triangle
-	//t_corners.clear();
-	//t_corners.push_back(vec3(-0.4f, -0.4f, 1));
-	//t_corners.push_back(vec3(0, 0.4f, 1));
-	//t_corners.push_back(vec3(0.4f, -0.4f, 1));
-	//m_triangles.push_back(new Triangle(t_corners));
-	//// Times two
-	//t_corners.clear();
-	//t_corners.push_back(vec3(0.4f, -0.4f, 1));
-	//t_corners.push_back(vec3(0, 0.4f, 1));
-	//t_corners.push_back(vec3(-0.4f, -0.4f, 1));
-	//m_triangles.push_back(new Triangle(t_corners));
 
 	/// Create ground plane
 	//float t_groundScale = 10;
@@ -140,22 +114,6 @@ void World::SetupWorld()
 	//t_corners.push_back(vec3(1 * t_groundScale, t_groundHeight, 1 * t_groundScale));
 	//t_corners.push_back(vec3(1 * t_groundScale, t_groundHeight, -1 * t_groundScale));
 	//m_triangles.push_back(new Triangle(t_corners, vec3(0, 0, 1)));
-
-	/// Create world room
-	// Floor part
-	//vec3 t_roomScale = vec3(1, 1, 1);
-	//t_corners.clear();
-	//t_corners.push_back(vec3(-1 * t_roomScale.x, -1 * t_roomScale.y, -1 * t_roomScale.z));
-	//t_corners.push_back(vec3(-1 * t_roomScale.x, -1 * t_roomScale.y,  1 * t_roomScale.z));
-	//t_corners.push_back(vec3( 1 * t_roomScale.x, -1 * t_roomScale.y,  1 * t_roomScale.z));
-	//m_triangles.push_back(new Triangle(t_corners, vec3(0, 0, 1)));
-	//
-	//t_corners.clear();
-	//t_corners.push_back(vec3(-1 * t_roomScale.x, -1 * t_roomScale.y, -1 * t_roomScale.z));
-	//t_corners.push_back(vec3( 1 * t_roomScale.x, -1 * t_roomScale.y,  1 * t_roomScale.z));
-	//t_corners.push_back(vec3( 1 * t_roomScale.x, -1 * t_roomScale.y, -1 * t_roomScale.z));
-	//m_triangles.push_back(new Triangle(t_corners, vec3(0, 0, 1)));
-
 
 
 

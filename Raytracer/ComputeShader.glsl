@@ -191,9 +191,12 @@ Hitdata ComputeHit(Ray ray, Hitdata p_hitdata, bool shadow)
 			t_hitdata = RayPwnTriangle(ray, trianglePositions[i], trianglePositions[i+1], trianglePositions[i+2], t_hitdata);
 			if(t_hitdata.hit && hitdata.hitDistance > t_hitdata.hitDistance)
 			{
-				hitdata = t_hitdata;
-				hitdata.hitTriangle = true;
-				hitdata.hitIndex = i / 3;
+				if(!(shadow && i < 36))
+				{
+					hitdata = t_hitdata;
+					hitdata.hitTriangle = true;
+					hitdata.hitIndex = i / 3;
+				}
 			}
 		}
 	}

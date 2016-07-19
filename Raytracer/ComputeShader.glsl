@@ -16,14 +16,19 @@ layout (local_size_x = 16, local_size_y = 16) in;
 uniform vec3[50] lightPositions;
 uniform int numLights;
 
+//Diffuse lights
+uniform vec3[50] diffuseLightingDirections;
+uniform int numDiffuseLights;
 //Spheres
 uniform vec3[5] spherePositions; // Maximum of of 5 spheres
 uniform float[5] sphereRadii;
+uniform vec3 [5] sphereColors;
 uniform int numSpheres;
 
 //Triangles
 uniform vec3[3*10] trianglePositions; // 3 corners times maximum of 10 triangles
-uniform int numTriangles;
+uniform vec3[10] triangleColors;
+uniform int numTrianglePositions;
 
 
 // Hardcoded up-vector. used to figure out specific ups
@@ -178,7 +183,7 @@ Hitdata ComputeHit(Ray ray, Hitdata p_hitdata, bool shadow)
 	}
 
 	// Iterate through all triangles
-	for(int i = 0; i < numTriangles; i+=3)
+	for(int i = 0; i < numTrianglePositions; i+=3)
 	{
 		//if(!shadow || (shadow && p_hitdata.hitIndex != i && p_hitdata.hitTriangle))
 		{
@@ -188,7 +193,7 @@ Hitdata ComputeHit(Ray ray, Hitdata p_hitdata, bool shadow)
 			{
 				hitdata = t_hitdata;
 				hitdata.hitTriangle = true;
-				hitdata.hitIndex = i;
+				hitdata.hitIndex = i / 3;
 			}
 		}
 	}
@@ -214,6 +219,11 @@ float CalculatePointLightLightingOnly(Hitdata hitdata, Ray ray)
 			currentLightColorFactor *= 1 - length(hitLightVector) * inverseLightStrength; // This is for light cutoff 
 			lightFactorColor += clamp(currentLightColorFactor, 0, 1);
 		}
+	}
+	for(int i = 0; i<numDiffuseLights; i++)
+	{
+		// Alla diffuselights är starka
+		lightFactorColor += dot( diffuseLightingDirections[i],hitdata.normal);
 	}
 	// Ensure there's always ambience
 	lightFactorColor = clamp(lightFactorColor, 0.1f, 1.0f);
@@ -243,6 +253,21 @@ float CalculatePointLightShadowOnly(Hitdata hitdata, Ray ray)
 				
 			}
 		}
+	}
+	for(int i = 0; i<numDiffuseLights; i++)
+	{
+		if(dot(hitdata.normal, diffuseLightingDirections[i]) > 0)
+		{
+			Ray shadowRay;
+			shadowRay.dir = diffuseLightingDirections[i];
+			shadowRay.pos = hitdata.position;
+			Hitdata shadowHitdata = ComputeHit(shadowRay, hitdata, true);
+			if(shadowHitdata.hit)
+			{
+				lightFactorColor *= 0.5; // How shadowy shadows become
+			}
+		}
+
 	}
 	return lightFactorColor;
 }
@@ -335,8 +360,18 @@ void main()
 
 	// Store color
 	vec4 color;
-	color = vec4(lightValue,0,0, 1);
-
+	if(!hitdata.hit)
+	{
+		color = vec4(0,lightValue,0,0);
+	}
+	else if(!hitdata.hitTriangle)
+	{
+		color = vec4(sphereColors[hitdata.hitIndex], 0) * lightValue;
+	}
+	else// if(hitdata.hitTriangle)
+	{
+		color = vec4(triangleColors[hitdata.hitIndex], 0) * lightValue;	
+	}
 	ivec2 storePos = ivec2(gl_GlobalInvocationID.xy);
 	storePos.y = 768 - storePos.y;
 	imageStore(destTex, storePos, color);

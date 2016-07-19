@@ -130,6 +130,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="DiffuseLight.cpp" />
     <ClCompile Include="GraphicsHelper.cpp" />
     <ClCompile Include="InputHelper.cpp" />
     <ClCompile Include="main.cpp" />
@@ -140,6 +141,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="DiffuseLight.h" />
     <ClInclude Include="GlobalConstants.h" />
     <ClInclude Include="GraphicsHelper.h" />
     <ClInclude Include="InputHelper.h" />

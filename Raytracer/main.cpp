@@ -73,24 +73,37 @@ void RenderScene()
 		glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "lightPositions"), t_lightPositions.size(), &t_lightPositions[0][0]);
 		glUniform1i(glGetUniformLocation(g_computeProgramHandle, "numLights"), t_lightPositions.size());
 	}
+
+	vector<vec3> t_diffuseLightingDirection;
+	g_world->GetDiffuseLighting(t_diffuseLightingDirection);
+	if (t_diffuseLightingDirection.size() > 0)
+	{
+		glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "diffuseLightingDirections"), t_diffuseLightingDirection.size(), &t_diffuseLightingDirection[0][0]);
+		glUniform1i(glGetUniformLocation(g_computeProgramHandle, "numDiffuseLights"), t_diffuseLightingDirection.size());
+	}
 	// Send in spheres
 	vector<vec3> t_spherePositions;
 	vector<float> t_sphereRadii;
-	g_world->GetSphereInfo(t_spherePositions, t_sphereRadii);
+	vector<vec3> t_sphereColors;
+	g_world->GetSphereInfo(t_spherePositions, t_sphereRadii, t_sphereColors);
 	if (t_spherePositions.size() > 0)
 	{
 		glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "spherePositions"), t_spherePositions.size(), &t_spherePositions[0][0]);
 		glUniform1fv(glGetUniformLocation(g_computeProgramHandle, "sphereRadii"), t_sphereRadii.size(), &t_sphereRadii[0]);
+		glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "spherePositions"), t_spherePositions.size(), &t_spherePositions[0][0]);
+		glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "sphereColors"), t_sphereColors.size(), &t_sphereColors[0][0]);
 		glUniform1i(glGetUniformLocation(g_computeProgramHandle, "numSpheres"), t_spherePositions.size());
 	}
 
 	// Send in triangles
 	vector<vec3> t_trianglePositions;
-	g_world->GetTriangleInfo(t_trianglePositions);
+	vector<vec3> t_triangleColors;
+	g_world->GetTriangleInfo(t_trianglePositions, t_triangleColors);
 	if (t_trianglePositions.size() > 0)
 	{
 		glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "trianglePositions"), t_trianglePositions.size(), &t_trianglePositions[0][0]);
-		glUniform1i(glGetUniformLocation(g_computeProgramHandle, "numTriangles"), t_trianglePositions.size());
+		glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "triangleColors"), t_triangleColors.size(), &t_triangleColors[0][0]);
+		glUniform1i(glGetUniformLocation(g_computeProgramHandle, "numTrianglePositions"), t_trianglePositions.size());
 	}
 	// Start compute
 	glDispatchCompute(1024 / 16, 768 / 16, 1);

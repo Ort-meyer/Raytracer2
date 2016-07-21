@@ -135,63 +135,63 @@ void World::SetupWorld()
 	m_triangles.push_back(new Triangle(t_corners, vec3(0, 0, 1)));
 	
 	// roof part
-	t_corners.clear();
-	t_corners.push_back(vec3(t_roomScaleMat * vec4(-1, 1, -1, 1)));
-	t_corners.push_back(vec3(t_roomScaleMat * vec4(1, 1, 1, 1)));
-	t_corners.push_back(vec3(t_roomScaleMat * vec4(-1, 1, 1, 1)));
-	m_triangles.push_back(new Triangle(t_corners, vec3(0, 0, 1)));
-	t_corners.clear();
-	t_corners.push_back(vec3(t_roomScaleMat * vec4(1, 1, 1, 1)));
-	t_corners.push_back(vec3(t_roomScaleMat * vec4(-1, 1, -1, 1)));
-	t_corners.push_back(vec3(t_roomScaleMat * vec4(1, 1, -1, 1)));
-	m_triangles.push_back(new Triangle(t_corners, vec3(0, 0, 1)));
-	
-	// Right part
-	t_corners.clear();
-	t_corners.push_back(vec3(t_roomScaleMat * vec4(1, -1, -1, 1)));
-	t_corners.push_back(vec3(t_roomScaleMat * vec4(1, 1, 1, 1)));
-	t_corners.push_back(vec3(t_roomScaleMat * vec4(1, 1, -1, 1)));
-	m_triangles.push_back(new Triangle(t_corners, vec3(0, 0, 1)));
-	t_corners.clear();
-	t_corners.push_back(vec3(t_roomScaleMat * vec4(1, 1, 1, 1)));
-	t_corners.push_back(vec3(t_roomScaleMat * vec4(1, -1, -1, 1)));
-	t_corners.push_back(vec3(t_roomScaleMat * vec4(1, -1, 1, 1)));
-	m_triangles.push_back(new Triangle(t_corners, vec3(0, 0, 1)));
-	
-	// Left
-	t_corners.clear();
-	t_corners.push_back(vec3(t_roomScaleMat * vec4(-1, -1, -1, 1)));
-	t_corners.push_back(vec3(t_roomScaleMat * vec4(-1, 1, -1, 1)));
-	t_corners.push_back(vec3(t_roomScaleMat * vec4(-1, 1, 1, 1)));
-	m_triangles.push_back(new Triangle(t_corners, vec3(0, 0, 1)));
-	t_corners.clear();
-	t_corners.push_back(vec3(t_roomScaleMat * vec4(-1, 1, 1, 1)));
-	t_corners.push_back(vec3(t_roomScaleMat * vec4(-1, -1, 1, 1)));
-	t_corners.push_back(vec3(t_roomScaleMat * vec4(-1, -1, -1, 1)));
-	m_triangles.push_back(new Triangle(t_corners, vec3(0, 0, 1)));
-	
-	// Front
-	
-	t_corners.clear();
-	t_corners.push_back(vec3(t_roomScaleMat * vec4(-1, -1, -1, 1)));
-	t_corners.push_back(vec3(t_roomScaleMat * vec4(1, 1, -1, 1)));
-	t_corners.push_back(vec3(t_roomScaleMat * vec4(-1, 1, -1, 1)));
-	m_triangles.push_back(new Triangle(t_corners, vec3(0, 0, 1)));
-	t_corners.clear();
-	t_corners.push_back(vec3(t_roomScaleMat * vec4(1, 1, -1, 1)));
-	t_corners.push_back(vec3(t_roomScaleMat * vec4(-1, -1, -1, 1)));
-	t_corners.push_back(vec3(t_roomScaleMat * vec4(1, -1, -1, 1)));
-	m_triangles.push_back(new Triangle(t_corners, vec3(0, 0, 1)));
-	
-	// Back
-	t_corners.clear();
-	t_corners.push_back(vec3(t_roomScaleMat * vec4(-1, -1, 1, 1)));
-	t_corners.push_back(vec3(t_roomScaleMat * vec4(-1, 1, 1, 1)));
-	t_corners.push_back(vec3(t_roomScaleMat * vec4(1, 1, 1, 1)));
-	m_triangles.push_back(new Triangle(t_corners, vec3(0, 0, 1)));
-	t_corners.clear();
-	t_corners.push_back(vec3(t_roomScaleMat * vec4(1, 1, 1, 1)));
-	t_corners.push_back(vec3(t_roomScaleMat * vec4(1, -1, 1, 1)));
-	t_corners.push_back(vec3(t_roomScaleMat * vec4(-1, -1, 1, 1)));
-	m_triangles.push_back(new Triangle(t_corners, vec3(0, 0, 1)));
+	//t_corners.clear();
+	//t_corners.push_back(vec3(t_roomScaleMat * vec4(-1, 1, -1, 1)));
+	//t_corners.push_back(vec3(t_roomScaleMat * vec4(1, 1, 1, 1)));
+	//t_corners.push_back(vec3(t_roomScaleMat * vec4(-1, 1, 1, 1)));
+	//m_triangles.push_back(new Triangle(t_corners, vec3(0, 0, 1)));
+	//t_corners.clear();
+	//t_corners.push_back(vec3(t_roomScaleMat * vec4(1, 1, 1, 1)));
+	//t_corners.push_back(vec3(t_roomScaleMat * vec4(-1, 1, -1, 1)));
+	//t_corners.push_back(vec3(t_roomScaleMat * vec4(1, 1, -1, 1)));
+	//m_triangles.push_back(new Triangle(t_corners, vec3(0, 0, 1)));
+	//
+	//// Right part
+	//t_corners.clear();
+	//t_corners.push_back(vec3(t_roomScaleMat * vec4(1, -1, -1, 1)));
+	//t_corners.push_back(vec3(t_roomScaleMat * vec4(1, 1, 1, 1)));
+	//t_corners.push_back(vec3(t_roomScaleMat * vec4(1, 1, -1, 1)));
+	//m_triangles.push_back(new Triangle(t_corners, vec3(0, 0, 1)));
+	//t_corners.clear();
+	//t_corners.push_back(vec3(t_roomScaleMat * vec4(1, 1, 1, 1)));
+	//t_corners.push_back(vec3(t_roomScaleMat * vec4(1, -1, -1, 1)));
+	//t_corners.push_back(vec3(t_roomScaleMat * vec4(1, -1, 1, 1)));
+	//m_triangles.push_back(new Triangle(t_corners, vec3(0, 0, 1)));
+	//
+	//// Left
+	//t_corners.clear();
+	//t_corners.push_back(vec3(t_roomScaleMat * vec4(-1, -1, -1, 1)));
+	//t_corners.push_back(vec3(t_roomScaleMat * vec4(-1, 1, -1, 1)));
+	//t_corners.push_back(vec3(t_roomScaleMat * vec4(-1, 1, 1, 1)));
+	//m_triangles.push_back(new Triangle(t_corners, vec3(0, 0, 1)));
+	//t_corners.clear();
+	//t_corners.push_back(vec3(t_roomScaleMat * vec4(-1, 1, 1, 1)));
+	//t_corners.push_back(vec3(t_roomScaleMat * vec4(-1, -1, 1, 1)));
+	//t_corners.push_back(vec3(t_roomScaleMat * vec4(-1, -1, -1, 1)));
+	//m_triangles.push_back(new Triangle(t_corners, vec3(0, 0, 1)));
+	//
+	//// Front
+	//
+	//t_corners.clear();
+	//t_corners.push_back(vec3(t_roomScaleMat * vec4(-1, -1, -1, 1)));
+	//t_corners.push_back(vec3(t_roomScaleMat * vec4(1, 1, -1, 1)));
+	//t_corners.push_back(vec3(t_roomScaleMat * vec4(-1, 1, -1, 1)));
+	//m_triangles.push_back(new Triangle(t_corners, vec3(0, 0, 1)));
+	//t_corners.clear();
+	//t_corners.push_back(vec3(t_roomScaleMat * vec4(1, 1, -1, 1)));
+	//t_corners.push_back(vec3(t_roomScaleMat * vec4(-1, -1, -1, 1)));
+	//t_corners.push_back(vec3(t_roomScaleMat * vec4(1, -1, -1, 1)));
+	//m_triangles.push_back(new Triangle(t_corners, vec3(0, 0, 1)));
+	//
+	//// Back
+	//t_corners.clear();
+	//t_corners.push_back(vec3(t_roomScaleMat * vec4(-1, -1, 1, 1)));
+	//t_corners.push_back(vec3(t_roomScaleMat * vec4(-1, 1, 1, 1)));
+	//t_corners.push_back(vec3(t_roomScaleMat * vec4(1, 1, 1, 1)));
+	//m_triangles.push_back(new Triangle(t_corners, vec3(0, 0, 1)));
+	//t_corners.clear();
+	//t_corners.push_back(vec3(t_roomScaleMat * vec4(1, 1, 1, 1)));
+	//t_corners.push_back(vec3(t_roomScaleMat * vec4(1, -1, 1, 1)));
+	//t_corners.push_back(vec3(t_roomScaleMat * vec4(-1, -1, 1, 1)));
+	//m_triangles.push_back(new Triangle(t_corners, vec3(0, 0, 1)));
 }

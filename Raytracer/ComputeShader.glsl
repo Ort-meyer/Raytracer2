@@ -398,34 +398,61 @@ void main()
 	// Get this pixels ray
 	Ray ray = RayDirection();
 	Hitdata derp;
-	Hitdata hitdata = ComputeHit(ray, derp, false);
 
-	// Calculate light based on hit
-	float lightValue = 0;
-	if(hitdata.hit)
+
+
+	// Bounce new shit
+	vec3 endColor = vec3(0,0,0);
+	for(int i = 0; i < 2; i++)
 	{
-		//lightValue = CalculatePointLightLighting(hitdata, ray);
-		lightValue = CalculatePointLightLightingOnly(hitdata, ray);
-		lightValue *= CalculatePointLightShadowOnly(hitdata, ray);
+		float lightValue = 0;
+		Hitdata hitdata = ComputeHit(ray, derp, false);
+		if(hitdata.hit)
+		{
+			ray.pos = hitdata.position;
+			ray.dir = reflect(ray.dir, hitdata.normal);
+			lightValue = CalculatePointLightLightingOnly(hitdata, ray);
+			lightValue *= CalculatePointLightShadowOnly(hitdata, ray);
+		
+			if(hitdata.hitTriangle)
+				endColor += triangleColors[hitdata.hitIndex] * lightValue;
+			else
+				endColor += sphereColors[hitdata.hitIndex] * lightValue;
+		}
+		else
+			break;
 	}
 
-	// Store color
-	vec4 color;
-	if(!hitdata.hit)
-	{
-		color = vec4(0,lightValue,0,0);
-	}
-	else if(!hitdata.hitTriangle)
-	{
-		color = vec4(sphereColors[hitdata.hitIndex], 0) * lightValue;
-	}
-	else// if(hitdata.hitTriangle)
-	{
-		color = vec4(triangleColors[hitdata.hitIndex], 0) * lightValue;	
-	}
+
+	//Hitdata hitdata = ComputeHit(ray, derp, false);
+	//
+	//// Calculate light based on hit
+	//float lightValue = 0;
+	//if(hitdata.hit)
+	//{
+	//	//lightValue = CalculatePointLightLighting(hitdata, ray);
+	//	lightValue = CalculatePointLightLightingOnly(hitdata, ray);
+	//	lightValue *= CalculatePointLightShadowOnly(hitdata, ray);
+	//}
+	//
+	//// Store color
+	//vec4 color;
+	//if(!hitdata.hit)
+	//{
+	//	color = vec4(0,lightValue,0,0);
+	//}
+	//else if(!hitdata.hitTriangle)
+	//{
+	//	color = vec4(sphereColors[hitdata.hitIndex], 0) * lightValue;
+	//}
+	//else// if(hitdata.hitTriangle)
+	//{
+	//	color = vec4(triangleColors[hitdata.hitIndex], 0) * lightValue;	
+	//}
+
 	ivec2 storePos = ivec2(gl_GlobalInvocationID.xy);
 	storePos.y = 768 - storePos.y;
-	imageStore(destTex, storePos, color);
+	imageStore(destTex, storePos, vec4(endColor.xyz,0));
 }
 
 

@@ -206,9 +206,9 @@ Hitdata ComputeHit(Ray ray, Hitdata p_hitdata, bool shadow)
 
 float CalculateLightStrength(vec3 vertexToEye, vec3 lightDirection, vec3 hitNormal)
 {
-	float diffuseIntensity = 1;
-	float specularPower = 2;
-	float matSpecularIntensity = 0;
+	float diffuseIntensity = 0.6;
+	float specularPower = 4;
+	float matSpecularIntensity = 0.4;
 	
 	// Simple diffuse calculation
 	float diffuseFactor = dot(hitNormal, -lightDirection) * diffuseIntensity;
@@ -274,7 +274,7 @@ float CalculatePointLightLightingOnly(Hitdata hitdata, Ray ray)
 		//}
 		//lightFactorColor += diffuseValue + clamp(specularValue, 0, 1);
 	
-		lightFactorColor += CalculateLightStrength(normalize(hitdata.position - ray.pos), diffuseLightingDirections[i], hitdata.normal);
+		lightFactorColor += CalculateLightStrength(normalize(ray.pos - hitdata.position), diffuseLightingDirections[i], hitdata.normal);
 	
 	
 		// Alla diffuselights är starka

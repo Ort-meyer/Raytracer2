@@ -71,8 +71,9 @@ void World::SetupWorld()
 	//m_diffuseLights.push_back(new DiffuseLight(vec3(0, 0, 1)));
 	// Setup spheres
 	m_spheres.push_back(new Sphere(vec3(0, 0, 0), vec3(0, 1, 0), 0.25f));
-	m_spheres.push_back(new Sphere(vec3(0, 1, 0), vec3(0, 0, 1), 0.10f));
-
+	m_spheres.push_back(new Sphere(vec3(0, 1, 0), vec3(1, 0, 1), 0.10f));
+	m_spheres.push_back(new Sphere(vec3(0, 4, 3), vec3(1, 0, 0), 0.7f));
+	//Red sphere is kinda buggy. might have to do with length
 
 	//m_spheres.push_back(new Sphere(vec3(0, -0.8, 0), 0.25f));
 

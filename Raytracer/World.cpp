@@ -70,7 +70,7 @@ void World::SetupWorld()
 	// Diffuse lighting
 	m_diffuseLights.push_back(new DiffuseLight(vec3(0, 0, 1)));
 	// Setup spheres
-	m_spheres.push_back(new Sphere(vec3(0, 0, 2), vec3(0, 1, 0), 0.25f));
+	m_spheres.push_back(new Sphere(vec3(0, 0, 0), vec3(0, 1, 0), 0.25f));
 	m_spheres.push_back(new Sphere(vec3(0, 1, 0), vec3(0, 0, 1), 0.10f));
 
 
@@ -81,6 +81,9 @@ void World::SetupWorld()
 	vector<vec3> t_waypoints;
 	t_waypoints.clear();
 	t_waypoints.push_back(vec3(0, 3, 0));
+	m_pointLights.push_back(new PointLight(t_waypoints, vec3(1, 1, 1), 0, vec3(0, 5, 0)));
+	//t_waypoints.clear();
+	//t_waypoints.push_back(vec3(0, -3, 0));
 	//m_pointLights.push_back(new PointLight(t_waypoints, vec3(1, 1, 1), 0, vec3(0, 5, 0)));
 
 	//for (int i = -2; i < 2; i++)

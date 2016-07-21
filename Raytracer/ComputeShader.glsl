@@ -225,6 +225,7 @@ float CalculateLightStrength(vec3 vertexToEye, vec3 lightDirection, vec3 hitNorm
 	}
 	//return clamp(specularFactor + diffuseFactor, 0.1, 1.0f);
 	return diffuseFactor + clamp(specularFactor, 0.1, 1.0f);
+	//return diffuseFactor + specularFactor + 0.1;
 
 }
 
@@ -233,6 +234,30 @@ float CalculatePointLightLightingOnly(Hitdata hitdata, Ray ray)
 	float lightFactorColor = 0.1; // some ambient
 	for(int i = 0; i < numLights; i++)
 	{
+		vec3 lightDirection =  hitdata.position - lightPositions[i];
+		float distance = length(lightDirection);
+		lightDirection = normalize(lightDirection);
+
+		float lightValue = CalculateLightStrength(cameraPosition - hitdata.position, lightDirection, hitdata.normal);
+
+		float constant = 0.1;
+		float linear = 0.1;
+		float exponant = 0.1;
+
+		float attenuation = constant + linear * distance + exponant * distance * distance;
+
+		lightFactorColor += lightValue / attenuation;
+
+
+
+
+
+
+
+
+
+
+
 		// vector between light and where the ray hit an object
 		vec3 hitLightVector = lightPositions[i] - hitdata.position;
 		// "Angle" between hitLightVector and normal of hit
@@ -249,36 +274,7 @@ float CalculatePointLightLightingOnly(Hitdata hitdata, Ray ray)
 	}
 	for(int i = 0; i<numDiffuseLights; i++)
 	{
-		//// Add them to total light
-		//
-		//float diffuseIntensity = 0.6;
-		//float specularPower = 4;
-		//float matSpecularIntensity = 0.4;
-		//
-		//float specularValue = 0;
-		//// First calculate diffuse value
-		//float diffuseValue = dot(diffuseLightingDirections[i],hitdata.normal);
-		//if(diffuseValue > 0)
-		//{
-		//	diffuseValue *= diffuseIntensity;
-		//
-		//	// Now calculate specular lighting
-		//	vec3 toEye = normalize(hitdata.position - ray.pos);
-		//	vec3 lightReflect = normalize(reflect(diffuseLightingDirections[i], hitdata.normal));
-		//
-		//	specularValue = dot(toEye, lightReflect);
-		//	if(specularValue > 0 )
-		//	{
-		//		specularValue = matSpecularIntensity * pow(specularValue, specularPower);
-		//	}
-		//}
-		//lightFactorColor += diffuseValue + clamp(specularValue, 0, 1);
-	
-		lightFactorColor += CalculateLightStrength(normalize(ray.pos - hitdata.position), diffuseLightingDirections[i], hitdata.normal);
-	
-	
-		// Alla diffuselights är starka
-		//lightFactorColor += dot( diffuseLightingDirections[i],hitdata.normal);
+		lightFactorColor += CalculateLightStrength(normalize(cameraPosition - hitdata.position), diffuseLightingDirections[i], hitdata.normal);
 	}
 	// Ensure there's always ambience
 	lightFactorColor = clamp(lightFactorColor, 0.1f, 1.0f);
@@ -311,10 +307,10 @@ float CalculatePointLightShadowOnly(Hitdata hitdata, Ray ray)
 	}
 	for(int i = 0; i<numDiffuseLights; i++)
 	{
-		if(dot(hitdata.normal, diffuseLightingDirections[i]) > 0)
+		if(dot(hitdata.normal, - diffuseLightingDirections[i]) > 0)
 		{
 			Ray shadowRay;
-			shadowRay.dir = diffuseLightingDirections[i];
+			shadowRay.dir = - diffuseLightingDirections[i];
 			shadowRay.pos = hitdata.position;
 			Hitdata shadowHitdata = ComputeHit(shadowRay, hitdata, true);
 			if(shadowHitdata.hit)

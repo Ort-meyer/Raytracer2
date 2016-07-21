@@ -68,7 +68,7 @@ void World::GetDiffuseLighting(vector<vec3>& o_diffuseLightingDirections)
 void World::SetupWorld()
 {
 	// Diffuse lighting
-	m_diffuseLights.push_back(new DiffuseLight(vec3(0, 0, -1)));
+	m_diffuseLights.push_back(new DiffuseLight(vec3(0, 0, 1)));
 	// Setup spheres
 	m_spheres.push_back(new Sphere(vec3(0, 0, 2), vec3(0, 1, 0), 0.25f));
 	m_spheres.push_back(new Sphere(vec3(0, 1, 0), vec3(0, 0, 1), 0.10f));

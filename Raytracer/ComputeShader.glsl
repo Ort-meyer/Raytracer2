@@ -204,6 +204,30 @@ Hitdata ComputeHit(Ray ray, Hitdata p_hitdata, bool shadow)
 	return hitdata;
 }
 
+float CalculateLightStrength(vec3 vertexToEye, vec3 lightDirection, vec3 hitNormal)
+{
+	float diffuseIntensity = 1;
+	float specularPower = 2;
+	float matSpecularIntensity = 0;
+	
+	// Simple diffuse calculation
+	float diffuseFactor = dot(hitNormal, -lightDirection) * diffuseIntensity;
+	// 
+	float specularFactor = 0.0f;
+	if(diffuseFactor > 0)
+	{
+		vec3 lightReflect = normalize(reflect(lightDirection, hitNormal));
+		specularFactor = dot(vertexToEye, lightReflect);
+		if(specularFactor > 0)
+		{
+			specularFactor = matSpecularIntensity * pow(specularFactor, specularPower);
+		}
+	}
+	//return clamp(specularFactor + diffuseFactor, 0.1, 1.0f);
+	return diffuseFactor + clamp(specularFactor, 0.1, 1.0f);
+
+}
+
 float CalculatePointLightLightingOnly(Hitdata hitdata, Ray ray)
 {
 	float lightFactorColor = 0.1; // some ambient
@@ -225,34 +249,34 @@ float CalculatePointLightLightingOnly(Hitdata hitdata, Ray ray)
 	}
 	for(int i = 0; i<numDiffuseLights; i++)
 	{
-
-
-		float diffuseIntensity = 0.6;
-		float specularPower = 4;
-		float matSpecularIntensity = 0.4;
-		
-		float specularValue = 0;
-		// First calculate diffuse value
-		float diffuseValue = dot(diffuseLightingDirections[i],hitdata.normal);
-		if(diffuseValue > 0)
-		{
-			diffuseValue *= diffuseIntensity;
-		
-			// Now calculate specular lighting
-			vec3 toEye = normalize(hitdata.position - ray.pos);
-			vec3 lightReflect = normalize(reflect(diffuseLightingDirections[i], hitdata.normal));
-		
-			specularValue = dot(toEye, lightReflect);
-			if(specularValue > 0 )
-			{
-				specularValue = matSpecularIntensity * pow(specularValue, specularPower);
-			}
-		}
-		
-		// Add them to total light
-		lightFactorColor += diffuseValue + clamp(specularValue, 0, 1);
-
-
+		//// Add them to total light
+		//
+		//float diffuseIntensity = 0.6;
+		//float specularPower = 4;
+		//float matSpecularIntensity = 0.4;
+		//
+		//float specularValue = 0;
+		//// First calculate diffuse value
+		//float diffuseValue = dot(diffuseLightingDirections[i],hitdata.normal);
+		//if(diffuseValue > 0)
+		//{
+		//	diffuseValue *= diffuseIntensity;
+		//
+		//	// Now calculate specular lighting
+		//	vec3 toEye = normalize(hitdata.position - ray.pos);
+		//	vec3 lightReflect = normalize(reflect(diffuseLightingDirections[i], hitdata.normal));
+		//
+		//	specularValue = dot(toEye, lightReflect);
+		//	if(specularValue > 0 )
+		//	{
+		//		specularValue = matSpecularIntensity * pow(specularValue, specularPower);
+		//	}
+		//}
+		//lightFactorColor += diffuseValue + clamp(specularValue, 0, 1);
+	
+		lightFactorColor += CalculateLightStrength(normalize(hitdata.position - ray.pos), diffuseLightingDirections[i], hitdata.normal);
+	
+	
 		// Alla diffuselights är starka
 		//lightFactorColor += dot( diffuseLightingDirections[i],hitdata.normal);
 	}

@@ -134,6 +134,7 @@
     <ClCompile Include="GraphicsHelper.cpp" />
     <ClCompile Include="InputHelper.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="ModelLoader.cpp" />
     <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="Sphere.cpp" />
     <ClCompile Include="Triangle.cpp" />
@@ -145,6 +146,7 @@
     <ClInclude Include="GlobalConstants.h" />
     <ClInclude Include="GraphicsHelper.h" />
     <ClInclude Include="InputHelper.h" />
+    <ClInclude Include="ModelLoader.h" />
     <ClInclude Include="PointLight.h" />
     <ClInclude Include="Sphere.h" />
     <ClInclude Include="Triangle.h" />

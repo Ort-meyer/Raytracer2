@@ -30,6 +30,13 @@ uniform vec3[3*40] trianglePositions; // 3 corners times maximum of 10 triangles
 uniform vec3[40] triangleColors;
 uniform int numTrianglePositions;
 
+//BTH logo buffer
+layout (std430, binding = 2) buffer shader_data
+{
+	//vec3 bthCorners[16368];
+	//float bthCorners[9];
+	float bthCorners[16368*3];
+};
 
 // Hardcoded up-vector. used to figure out specific ups
 vec3 cameraUp = vec3(0,1,0);
@@ -123,48 +130,6 @@ Hitdata RayPwnSphere(vec3 rayPos, vec3 rayDir, vec3 spherePos, float sphereRad)
 // taken from http://stackoverflow.com/questions/13655457/raytracing-ray-triangle-intersection
 Hitdata RayPwnTriangle(Ray ray, vec3 p0, vec3 p1, vec3 p2, Hitdata hitdata)
 {
-	//vec3 v0v1 = p1 - p0;
-	//vec3 v0v2 = p2 - p0;
-	//vec3 pvec = cross(ray.dir, v0v2);
-	//float det = dot(v0v1, pvec);
-	//
-	//// With culling
-	//if(det < 0.0001) // Should be 0?
-	//{
-	//	// No hit
-	//}
-	//// Without culling
-	////if(abs(det) < 0.0001)
-	////{
-	////	//no hit
-	////}
-	//
-	//float invDet = 1 / det;
-	//
-	//vec3 tvec = ray.pos - p0;
-	//float u = dot(tvec, pvec) * invDet;
-	//if (u < 0 || u > 1) 
-	//{
-	//	// No hit
-	//} 
-	//
-	//vec3 qvec = cross(tvec, v0v1);
-	//float v = dot(ray.dir, qvec) * invDet;
-	//if(u < 0 || u + v > 1)
-	//{
-	//	// no hit
-	//}
-	//
-	//float t = dot(v0v2, qvec) * invDet;
-	//
-	//Hitdata hitdata;
-	//hitdata.hitDistance = t;
-	//hitdata.normal = normalize(cross(v0v1, v0v2));
-	//hitdata.position = ray.pos + ray.dir * t;
-	//hitdata.hit = true;
-	//return hitdata;
-
-
 	hitdata.hit = false;
 
 	vec3 e1 = p1 - p0;
@@ -244,6 +209,23 @@ Hitdata ComputeHit(Ray ray, Hitdata p_hitdata, bool shadow)
 			}
 		}
 	}
+	// Now iterate through all triangles in ssbo. Yup, this is smart
+	//for(int i = 0; i < 6; i+=3)
+	for(int i = 0; i < 2000; i+=9)
+	{
+		Hitdata t_hitdata;
+		vec3 p0 = vec3(bthCorners[i], bthCorners[i+1], bthCorners[i+2]);
+		vec3 p1 = vec3(bthCorners[i+3], bthCorners[i+4], bthCorners[i+5]);
+		vec3 p2 = vec3(bthCorners[i+6], bthCorners[i+7], bthCorners[i+8]);
+		//t_hitdata = RayPwnTriangle(ray, bthCorners[i], bthCorners[i+1], bthCorners[i+2], t_hitdata);
+		t_hitdata = RayPwnTriangle(ray, p0,p1,p2, t_hitdata);
+		if(t_hitdata.hit && hitdata.hitDistance > t_hitdata.hitDistance && hitdata.hitDistance > 0)
+		{
+			hitdata = t_hitdata;
+			hitdata.hitTriangle = true;
+			hitdata.hitIndex = i / 3;
+		}
+	}
 
 	return hitdata;
 }
@@ -291,16 +273,6 @@ float CalculatePointLightLightingOnly(Hitdata hitdata, Ray ray)
 		float attenuation = constant + linear * distance + exponant * distance * distance;
 
 		lightFactorColor += lightValue / attenuation;
-
-
-
-
-
-
-
-
-
-
 
 		// vector between light and where the ray hit an object
 		vec3 hitLightVector = lightPositions[i] - hitdata.position;
@@ -367,72 +339,6 @@ float CalculatePointLightShadowOnly(Hitdata hitdata, Ray ray)
 	return lightFactorColor;
 }
 
-// Calculates light value of pixel
-// Light computation from http://gamedev.stackexchange.com/questions/56897/glsl-light-attenuation-color-and-intensity-formula
-float CalculatePointLightLighting(Hitdata hitdata, Ray ray)
-{
-	float lightFactorColor = 0.1; // some ambient
-	for(int i = 0; i < numLights; i++)
-	{
-		// vector between light and where the ray hit an object
-		vec3 hitLightVector = lightPositions[i] - hitdata.position;
-		// "Angle" between hitLightVector and normal of hit
-		float normalLightDot = dot(hitdata.normal, hitLightVector);
-		
-		// Check if hit is on the "right side" of the light
-		if(normalLightDot > 0)
-		{		
-			// First, see if there's anything in the way.
-			Ray shadowRay;
-			shadowRay.dir = normalize(hitLightVector);
-			shadowRay.pos = hitdata.position;
-			Hitdata shadowHitdata = ComputeHit(shadowRay, hitdata, true);
-			// Hitdata och hitdistance går inte alltid att lita på.
-			if(shadowHitdata.hit && length(shadowHitdata.position - shadowRay.pos) <= length(hitLightVector))
-			{
-				lightFactorColor -= 0.7; // How shadowy shadows become
-				
-			}
-
-			// There wasn't anything in the way
-			else
-			{
-				if(false)
-				{
-					float cutoffDistance = 5;
-					float lightDistance = length(hitLightVector);
-					if(lightDistance < 1000)
-					{
-						float aFactor = 0.1;
-						float bFactor = 0.01;
-						float cFactor = 0.4;
-						float attenuation = 1 / (1 + aFactor * lightDistance + bFactor * lightDistance * lightDistance);
-						float dcont = max(0.0, normalLightDot);
-						lightFactorColor += attenuation * (dcont+cFactor);
-					}
-				}
-
-
-				else
-				{
-					float lightIntensity = clamp(normalLightDot, 0, 1);
-
-
-
-					// Wasn't anything in the way. It's illuminated
-					float currentLightColorFactor = normalLightDot;
-					float inverseLightStrength = 0.15;
-					currentLightColorFactor *= 1 - length(hitLightVector) * inverseLightStrength; // This is for light cutoff 
-					lightFactorColor += clamp(currentLightColorFactor, 0, 1);
-				}
-			}
-		}
-		
-	}
-	// Ensure there's always ambience
-	lightFactorColor = clamp(lightFactorColor, 0.4f, 1.0f);
-	return lightFactorColor;
-}
 
 
 
@@ -448,17 +354,17 @@ void main()
 
 	// Bounce new shit
 	vec3 endColor = vec3(0,0,0);
-	for(int i = 0; i < 2; i++)
+	for(int i = 0; i < 1; i++)
 	{
 		float lightValue = 0;
 		Hitdata hitdata = ComputeHit(ray, derp, false);
 		if(hitdata.hit)
 		{
-
-			lightValue = CalculatePointLightLightingOnly(hitdata, ray);
-			lightValue *= CalculatePointLightShadowOnly(hitdata, ray);
+			lightValue = 0.5;
+			//lightValue = CalculatePointLightLightingOnly(hitdata, ray);
+			//lightValue *= CalculatePointLightShadowOnly(hitdata, ray);
 			if(hitdata.hitTriangle)
-				endColor += triangleColors[hitdata.hitIndex] * lightValue;
+				endColor += triangleColors[0] * lightValue;
 			else
 				endColor += sphereColors[hitdata.hitIndex] * lightValue;
 			// Change ray for bounce
@@ -470,211 +376,79 @@ void main()
 			break;
 	}
 
-
-	//Hitdata hitdata = ComputeHit(ray, derp, false);
-	//
-	//// Calculate light based on hit
-	//float lightValue = 0;
-	//if(hitdata.hit)
-	//{
-	//	//lightValue = CalculatePointLightLighting(hitdata, ray);
-	//	lightValue = CalculatePointLightLightingOnly(hitdata, ray);
-	//	lightValue *= CalculatePointLightShadowOnly(hitdata, ray);
-	//}
-	//
-	//// Store color
-	//vec4 color;
-	//if(!hitdata.hit)
-	//{
-	//	color = vec4(0,lightValue,0,0);
-	//}
-	//else if(!hitdata.hitTriangle)
-	//{
-	//	color = vec4(sphereColors[hitdata.hitIndex], 0) * lightValue;
-	//}
-	//else// if(hitdata.hitTriangle)
-	//{
-	//	color = vec4(triangleColors[hitdata.hitIndex], 0) * lightValue;	
-	//}
-
 	ivec2 storePos = ivec2(gl_GlobalInvocationID.xy);
 	storePos.y = 768 - storePos.y;
+	
+	//endColor = bthCorners[1];
+
+
 	imageStore(destTex, storePos, vec4(endColor.xyz,0));
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-//struct box 
+//// Calculates light value of pixel
+//// Light computation from http://gamedev.stackexchange.com/questions/56897/glsl-light-attenuation-color-and-intensity-formula
+//float CalculatePointLightLighting(Hitdata hitdata, Ray ray)
 //{
-//  vec3 min;
-//  vec3 max;
-//};
-//
-//#define NUM_BOXES 2
-//const box boxes[] = 
-//{
-//  /* The ground */
-//  {vec3(-5.0, -0.1, -5.0), vec3(5.0, 0.0, 5.0)},
-//  /* Box in the middle */
-//  {vec3(-0.5, 0.0, -0.5), vec3(0.5, 1.0, 0.5)}
-//};
-//
-
-//
-//	
-
-
-
-
-
-
-
-//float RayVsSphere(vec3 rayDir, vec3 rayStartPos, vec4 sphere)
-//{
-//	float t1;
-//	float t2;
-//	float b = dot(rayDir, rayStartPos-sphere.xyz);
-//	float c = dot(rayStartPos - sphere.xyz, rayStartPos - sphere.xyz) - pow(sphere.w, 2);
-//
-//	bool hit = false;
-//	float f = pow(b, 2) - c;
-//
-//	if(f >=0)
-//		hit = true;
-//	
-//	if(hit)
+//	float lightFactorColor = 0.1; // some ambient
+//	for(int i = 0; i < numLights; i++)
 //	{
-//		return 1;
-//	}
-//	return 0;
-//
-//}
-
-
-
-
-//float Det(vec3 v1, vec3 v2, vec3 v3) //kanske inte funkar... 
-//{
-//	float det;
-//	det = (v1.x*v2.y*v3.z + v1.y*v2.z*v3.x + v1.z*v2.x*v3.y)-(v1.z * v2.y * v3.x + v1.y*v2.x*v3.z + v1.x * v2.z * v3.y);
-//	return det;
-//}
-//// Kommer inte kunna lösa problem om vi har två objekt efter varandra 
-//Hitdata RayPwnTriangle(Ray ray, Triangle triangle)
-//{
-//	Hitdata hitData;
-//	hitData.hitDistance = 100; //ta bort när den kan hantera flera penetrationer.
-//	vec3 e1 = triangle.p1-triangle.p0;
-//	vec3 e2 = triangle.p2-triangle.p0;
-//	vec3 s = ray.pos-triangle.p0;
-//	vec3 minusD = vec3(0,0,0)-ray.dir;
-//	float t = 1/(Det(minusD, e1, e2))*Det(s,e1,e2);
-//	float u = 1/(Det(minusD, e1, e2))*Det(minusD,s,e2);
-//	float v= 1/(Det(minusD, e1, e2))*Det(minusD,e1,s);
-//	float w = 1-u-v;
-//	if((u<=1 && u>=0) && (v<=1 && v>=0) && (w<=1 && w>=0) && t<=hitData.hitDistance && t>0)
-//	{
+//		// vector between light and where the ray hit an object
+//		vec3 hitLightVector = lightPositions[i] - hitdata.position;
+//		// "Angle" between hitLightVector and normal of hit
+//		float normalLightDot = dot(hitdata.normal, hitLightVector);
 //		
-//		hitData.hitDistance = t;
+//		// Check if hit is on the "right side" of the light
+//		if(normalLightDot > 0)
+//		{		
+//			// First, see if there's anything in the way.
+//			Ray shadowRay;
+//			shadowRay.dir = normalize(hitLightVector);
+//			shadowRay.pos = hitdata.position;
+//			Hitdata shadowHitdata = ComputeHit(shadowRay, hitdata, true);
+//			// Hitdata och hitdistance går inte alltid att lita på.
+//			if(shadowHitdata.hit && length(shadowHitdata.position - shadowRay.pos) <= length(hitLightVector))
+//			{
+//				lightFactorColor -= 0.7; // How shadowy shadows become
+//				
+//			}
+//
+//			// There wasn't anything in the way
+//			else
+//			{
+//				if(false)
+//				{
+//					float cutoffDistance = 5;
+//					float lightDistance = length(hitLightVector);
+//					if(lightDistance < 1000)
+//					{
+//						float aFactor = 0.1;
+//						float bFactor = 0.01;
+//						float cFactor = 0.4;
+//						float attenuation = 1 / (1 + aFactor * lightDistance + bFactor * lightDistance * lightDistance);
+//						float dcont = max(0.0, normalLightDot);
+//						lightFactorColor += attenuation * (dcont+cFactor);
+//					}
+//				}
+//
+//
+//				else
+//				{
+//					float lightIntensity = clamp(normalLightDot, 0, 1);
+//
+//
+//
+//					// Wasn't anything in the way. It's illuminated
+//					float currentLightColorFactor = normalLightDot;
+//					float inverseLightStrength = 0.15;
+//					currentLightColorFactor *= 1 - length(hitLightVector) * inverseLightStrength; // This is for light cutoff 
+//					lightFactorColor += clamp(currentLightColorFactor, 0, 1);
+//				}
+//			}
+//		}
+//		
 //	}
-//
-//	return hitData;
-//}
-
-
-
-//float RayIntersectSphere(vec3 ray, vec3 dir, vec3 center, float radius)
-//{
-//	vec3 rc = ray-center;
-//	float c = dot(rc, rc) - (radius*radius);
-//	float b = dot(dir, rc);
-//	float d = b*b - c;
-//	float t = -b - sqrt(abs(d));
-//
-//	//float st = step(0.0, min(t,d));
-//	//return mix(-1.0, t, st);
-//	
-//	if (d < 0.0 || t < 0.0) 
-//	{
-//		return 0; // Didn't hit, or wasn't the closest hit
-//	}
-//	 
-//	else 
-//	{
-//		return t;
-//	}
-//}
-
-
-
-
-
-
-
-//vec2 intersectBox(vec3 origin, vec3 dir, const box b) 
-//{
-//  vec3 tMin = (b.min - origin) / dir;
-//  vec3 tMax = (b.max - origin) / dir;
-//  vec3 t1 = min(tMin, tMax);
-//  vec3 t2 = max(tMin, tMax);
-//  float tNear = max(max(t1.x, t1.y), t1.z);
-//  float tFar = min(min(t2.x, t2.y), t2.z);
-//  return vec2(tNear, tFar);
-//}
-//
-
-
-
-//float RayVsSphere(vec3 ray, vec3 pos, vec4 sphere)
-//{
-//	float t1;
-//	float t2;
-//	float b = dot(ray, pos-sphere.xyz);
-//	float c = dot(pos - sphere.xyz, pos - sphere.xyz) - pow(sphere.w, 2);
-//
-//	bool hit = false;
-//	float f = pow(b, 2) - c;
-//
-//	if(f >=0)
-//		hit = true;
-//	
-//	if(hit)
-//	{
-//		return 1;
-//	}
-//	return 0;
-//
-//
-//	//float t1;
-//	//float t2;
-//	//float b = ray.d.Dot(ray.o - sphere.c);
-//	//float c = (ray.o - sphere.c).Dot(ray.o - sphere.c) - powf(sphere.r, 2.0f);
-//	//bool hit;
-//	//float f = powf(b, 2.0f) - c;
-//	//hit = f >= 0.0f? true:false;
-//	//
-//	//if(hit)
-//	//{
-//	//	
-//	//	t1 = -b - sqrtf(f);
-//	//	t2 = -b + sqrtf(f);
-//	//	if(t1 < hitData.t || hitData.t < 0.0f)
-//	//	{
-//	//		hitData.t = t1;
-//	//		hitData.color = sphere.color;
-//	//	}
-//	//}
-//	//
-//	//return hit;
+//	// Ensure there's always ambience
+//	lightFactorColor = clamp(lightFactorColor, 0.4f, 1.0f);
+//	return lightFactorColor;
 //}

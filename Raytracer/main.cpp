@@ -15,6 +15,7 @@
 #include "Camera.h"
 #include "World.h"
 #include "PointLight.h"
+#include "ModelLoader.h"
 
 
 static int turning = 0;
@@ -25,7 +26,9 @@ static int turning = 0;
 // Main texture on which raytrace output is stored
 GLuint g_textureHandle;
 
-/// Vertex Buffers
+/// SSBOs
+// ssbo of bth logo
+GLuint g_bthSSBO = 0;
 
 /// Shader programs
 // Used to render the final picture
@@ -105,6 +108,13 @@ void RenderScene()
 		glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "triangleColors"), t_triangleColors.size(), &t_triangleColors[0][0]);
 		glUniform1i(glGetUniformLocation(g_computeProgramHandle, "numTrianglePositions"), t_trianglePositions.size());
 	}
+
+	// BTH ssbo thingies
+	GLuint block_index = 0;
+	block_index = glGetProgramResourceIndex(g_computeProgramHandle, GL_SHADER_STORAGE_BLOCK, "shader_data");
+	GLuint ssbo_binding_point_index = 2;
+	glShaderStorageBlockBinding(g_computeProgramHandle, block_index, ssbo_binding_point_index);
+
 	// Start compute
 	glDispatchCompute(1024 / 16, 768 / 16, 1);
 
@@ -117,6 +127,31 @@ void RenderScene()
 
 	glutSwapBuffers();
 	turning = 0;
+}
+
+void CreateObjSSBO()
+{
+	glGenBuffers(1, &g_bthSSBO);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, g_bthSSBO);
+	// Load model to triangles (should be changed, really)
+	ModelLoader t_modelLoader;
+	vector<Triangle> t_bthTriangles = t_modelLoader.LoadModel("bth.obj");
+	// Get triangle corners into its own list
+	vector<vec3> t_bthCorners;
+	for (size_t i = 0; i < t_bthTriangles.size(); i++)
+	{
+		for (size_t j = 0; j < 3; j++)
+		{
+			t_bthCorners.push_back(t_bthTriangles[i].m_corners[j]);
+		}
+	}
+	
+	// Bind data to buffer
+	//glBufferData(GL_SHADER_STORAGE_BUFFER, t_bthCorners.size() * sizeof(vec3), &t_bthCorners[0], GL_DYNAMIC_COPY);
+	//glBufferData(GL_SHADER_STORAGE_BUFFER, t_bthCorners.size() * sizeof(vec3) - 4, &t_bthCorners[0].y, GL_DYNAMIC_COPY);
+	//glBufferData(GL_SHADER_STORAGE_BUFFER, 9*4, &fuckoff2, GL_DYNAMIC_COPY);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, t_bthCorners.size() * sizeof(vec3), &t_bthCorners[0], GL_DYNAMIC_COPY);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, g_bthSSBO);
 }
 
 // Methods to handle keyboard input. Bound to glut callback
@@ -171,6 +206,9 @@ int main(int argc, char** argv)
 	glutSetCursor(GLUT_CURSOR_NONE);
 
 	/// My stuff before starting the main loop
+	// Create bth logo buffer
+	CreateObjSSBO();
+
 	// Load basic render shader
 	vector<ShaderInfo> t_renderShaders;
 	t_renderShaders.push_back(ShaderInfo(GL_VERTEX_SHADER, "simpleVertexShader.glsl"));
@@ -188,7 +226,7 @@ int main(int argc, char** argv)
 
 	// Create the camera
 	g_camera = new Camera(vec3(0, 0, 1), vec3(0, 1, 0), vec3(0, 0, 0));
-
+	
 	// CreateWorld
 	g_world = new World();
 

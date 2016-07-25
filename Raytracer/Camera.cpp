@@ -70,6 +70,17 @@ void Camera::UpdatePosition()
     {
         m_position += t_right  * m_movementSpeed;
     }
+
+	// Up and down
+	if (t_inputHelper->m_keysPressed & (int)Keys::Up)
+	{
+		m_position += t_up * m_movementSpeed;
+	}
+
+	if (t_inputHelper->m_keysPressed & (int)Keys::Down)
+	{
+		m_position -= t_up  * m_movementSpeed;
+	}
 }
 
 void Camera::UpdateRotation()

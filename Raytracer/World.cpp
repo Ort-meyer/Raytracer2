@@ -70,9 +70,10 @@ void World::SetupWorld()
 	// Diffuse lighting
 	//m_diffuseLights.push_back(new DiffuseLight(vec3(0, 0, 1)));
 	// Setup spheres
-	m_spheres.push_back(new Sphere(vec3(0, 0, 0), vec3(0, 1, 0), 0.25f));
-	m_spheres.push_back(new Sphere(vec3(0, 1, 0), vec3(1, 0, 1), 0.10f));
-	m_spheres.push_back(new Sphere(vec3(0, 4, 3), vec3(1, 0, 0), 0.7f));
+	//m_spheres.push_back(new Sphere(vec3(0, 0, 0), vec3(0, 1, 0), 0.25f));
+	//m_spheres.push_back(new Sphere(vec3(0, 1, 0), vec3(1, 0, 1), 0.10f));
+	m_spheres.push_back(new Sphere(vec3(0, 4, 0), vec3(1, 0, 0), 0.7f));
+	m_spheres.push_back(new Sphere(vec3(0, -0.5f, 0), vec3(0, 1, 0), 0.1f));
 	//Red sphere is kinda buggy. might have to do with length
 
 	//m_spheres.push_back(new Sphere(vec3(0, -0.8, 0), 0.25f));
@@ -81,7 +82,7 @@ void World::SetupWorld()
 	// Setup point lights
 	vector<vec3> t_waypoints;
 	t_waypoints.clear();
-	t_waypoints.push_back(vec3(0, 3, 0));
+	t_waypoints.push_back(vec3(0, 2, 0));
 	m_pointLights.push_back(new PointLight(t_waypoints, vec3(1, 1, 1), 0, vec3(0, 5, 0)));
 	//t_waypoints.clear();
 	//t_waypoints.push_back(vec3(0, -3, 0));
@@ -101,9 +102,9 @@ void World::SetupWorld()
 
 	vector<vec3> t_corners;
 
-    ModelLoader t_modelLoader;
-    vector<Triangle*> t_objTriangles = t_modelLoader.LoadModel("bth.obj");
-    m_triangles.insert(m_triangles.end(), t_objTriangles.begin(), t_objTriangles.end());
+   //ModelLoader t_modelLoader;
+   //vector<Triangle*> t_objTriangles = t_modelLoader.LoadModel("bth.obj");
+   //m_triangles.insert(m_triangles.end(), t_objTriangles.begin(), t_objTriangles.end());
 
 
 

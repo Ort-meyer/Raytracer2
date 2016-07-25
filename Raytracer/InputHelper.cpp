@@ -38,7 +38,14 @@ void InputHelper::UpdateKeyDown(char key)
     case 'D':
 		m_keysPressed |= (int)Keys::D;
         break;
-
+	case 'f':
+	case 'F':
+		m_keysPressed |= (int)Keys::Up;
+		break;
+	case 'c':
+	case 'C':
+		m_keysPressed |= (int)Keys::Down;
+		break;
     }
 }
 
@@ -65,6 +72,14 @@ void InputHelper::UpdateKeyUp(char key)
     case 'D':
 		m_keysPressed ^= (int)Keys::D;
         break;
+	case 'f':
+	case 'F':
+		m_keysPressed ^= (int)Keys::Up;
+		break;
+	case 'c':
+	case 'C':
+		m_keysPressed ^= (int)Keys::Down;
+		break;
     }
 }
 

@@ -123,6 +123,50 @@ Hitdata RayPwnSphere(vec3 rayPos, vec3 rayDir, vec3 spherePos, float sphereRad)
 // taken from http://stackoverflow.com/questions/13655457/raytracing-ray-triangle-intersection
 Hitdata RayPwnTriangle(Ray ray, vec3 p0, vec3 p1, vec3 p2, Hitdata hitdata)
 {
+	//vec3 v0v1 = p1 - p0;
+	//vec3 v0v2 = p2 - p0;
+	//vec3 pvec = cross(ray.dir, v0v2);
+	//float det = dot(v0v1, pvec);
+	//
+	//// With culling
+	//if(det < 0.0001) // Should be 0?
+	//{
+	//	// No hit
+	//}
+	//// Without culling
+	////if(abs(det) < 0.0001)
+	////{
+	////	//no hit
+	////}
+	//
+	//float invDet = 1 / det;
+	//
+	//vec3 tvec = ray.pos - p0;
+	//float u = dot(tvec, pvec) * invDet;
+	//if (u < 0 || u > 1) 
+	//{
+	//	// No hit
+	//} 
+	//
+	//vec3 qvec = cross(tvec, v0v1);
+	//float v = dot(ray.dir, qvec) * invDet;
+	//if(u < 0 || u + v > 1)
+	//{
+	//	// no hit
+	//}
+	//
+	//float t = dot(v0v2, qvec) * invDet;
+	//
+	//Hitdata hitdata;
+	//hitdata.hitDistance = t;
+	//hitdata.normal = normalize(cross(v0v1, v0v2));
+	//hitdata.position = ray.pos + ray.dir * t;
+	//hitdata.hit = true;
+	//return hitdata;
+
+
+	hitdata.hit = false;
+
 	vec3 e1 = p1 - p0;
 	vec3 e2 = p2 - p0;
 	vec3 e1e2 = cross(e1, e2);
@@ -133,7 +177,7 @@ Hitdata RayPwnTriangle(Ray ray, vec3 p0, vec3 p1, vec3 p2, Hitdata hitdata)
 	{
 		return hitdata;
 	}
-
+	
 	float f = 1 / a;
 	vec3 s = ray.pos - p0;
 	float u = f*(dot(s, p));
@@ -148,9 +192,9 @@ Hitdata RayPwnTriangle(Ray ray, vec3 p0, vec3 p1, vec3 p2, Hitdata hitdata)
 		return hitdata;
 		
 	}
-
+	
 	float t = f * dot(e2, q);
-
+	
 	hitdata.hitDistance = t;
 	hitdata.normal = e1e2;
 	hitdata.position = ray.pos + ray.dir * t;
@@ -173,7 +217,7 @@ Hitdata ComputeHit(Ray ray, Hitdata p_hitdata, bool shadow)
 		{
 	
 			Hitdata t_hitdata = RayPwnSphere(ray.pos, ray.dir, spherePositions[i], sphereRadii[i]);
-			if(t_hitdata.hit && hitdata.hitDistance > t_hitdata.hitDistance)
+			if(t_hitdata.hit && hitdata.hitDistance > t_hitdata.hitDistance && hitdata.hitDistance > 0)
 			{
 				hitdata = t_hitdata;
 				hitdata.hitTriangle = false;
@@ -189,7 +233,7 @@ Hitdata ComputeHit(Ray ray, Hitdata p_hitdata, bool shadow)
 		{
 			Hitdata t_hitdata;
 			t_hitdata = RayPwnTriangle(ray, trianglePositions[i], trianglePositions[i+1], trianglePositions[i+2], t_hitdata);
-			if(t_hitdata.hit && hitdata.hitDistance > t_hitdata.hitDistance)
+			if(t_hitdata.hit && hitdata.hitDistance > t_hitdata.hitDistance && hitdata.hitDistance > 0)
 			{
 				if(!(shadow && i < 36))
 				{
@@ -277,7 +321,7 @@ float CalculatePointLightLightingOnly(Hitdata hitdata, Ray ray)
 		lightFactorColor += CalculateLightStrength(normalize(cameraPosition - hitdata.position), diffuseLightingDirections[i], hitdata.normal);
 	}
 	// Ensure there's always ambience
-	lightFactorColor = clamp(lightFactorColor, 0.1f, 1.0f);
+	lightFactorColor = clamp(lightFactorColor, 0.4f, 1.0f);
 	return lightFactorColor;
 }
 float CalculatePointLightShadowOnly(Hitdata hitdata, Ray ray)
@@ -397,6 +441,7 @@ void main()
 {
 	// Get this pixels ray
 	Ray ray = RayDirection();
+	ray.dir = normalize(ray.dir);
 	Hitdata derp;
 
 
@@ -409,15 +454,17 @@ void main()
 		Hitdata hitdata = ComputeHit(ray, derp, false);
 		if(hitdata.hit)
 		{
-			ray.pos = hitdata.position;
-			ray.dir = reflect(ray.dir, hitdata.normal);
+
 			lightValue = CalculatePointLightLightingOnly(hitdata, ray);
 			lightValue *= CalculatePointLightShadowOnly(hitdata, ray);
-		
 			if(hitdata.hitTriangle)
 				endColor += triangleColors[hitdata.hitIndex] * lightValue;
 			else
 				endColor += sphereColors[hitdata.hitIndex] * lightValue;
+			// Change ray for bounce
+			ray.pos = hitdata.position;
+			ray.dir = normalize(reflect(normalize(ray.dir), normalize(hitdata.normal)));
+
 		}
 		else
 			break;

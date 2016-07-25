@@ -13,6 +13,8 @@ namespace Input
 		S = 0x02,
 		A = 0x04,
 		D = 0x08,
+		Up = 0x10,
+		Down = 0x20,
 
 	};
 

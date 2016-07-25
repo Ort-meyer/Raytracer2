@@ -12,7 +12,7 @@ public:
     ModelLoader();
     ~ModelLoader();
 
-    vector<Triangle> LoadModel(const char* p_fileName);
+    vector<Triangle*> LoadModel(const char* p_fileName);
 
 };
 

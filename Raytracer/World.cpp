@@ -1,5 +1,5 @@
 #include "World.h"
-
+#include "ModelLoader.h"
 
 
 World::World()
@@ -100,6 +100,12 @@ void World::SetupWorld()
 	// Setup triangles (should be done via obj later)
 
 	vector<vec3> t_corners;
+
+    ModelLoader t_modelLoader;
+    vector<Triangle*> t_objTriangles = t_modelLoader.LoadModel("bth.obj");
+    m_triangles.insert(m_triangles.end(), t_objTriangles.begin(), t_objTriangles.end());
+
+
 
 	/// Create ground plane
 	//float t_groundScale = 10;

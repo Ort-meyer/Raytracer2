@@ -211,7 +211,7 @@ Hitdata ComputeHit(Ray ray, Hitdata p_hitdata, bool shadow)
 	}
 	// Now iterate through all triangles in ssbo. Yup, this is smart
 	//for(int i = 0; i < 6; i+=3)
-	for(int i = 0; i < 2000; i+=9)
+	for(int i = 0; i < 400; i+=9)
 	{
 		Hitdata t_hitdata;
 		vec3 p0 = vec3(bthCorners[i], bthCorners[i+1], bthCorners[i+2]);
@@ -354,15 +354,15 @@ void main()
 
 	// Bounce new shit
 	vec3 endColor = vec3(0,0,0);
-	for(int i = 0; i < 1; i++)
+	for(int i = 0; i < 2; i++)
 	{
 		float lightValue = 0;
 		Hitdata hitdata = ComputeHit(ray, derp, false);
 		if(hitdata.hit)
 		{
 			lightValue = 0.5;
-			//lightValue = CalculatePointLightLightingOnly(hitdata, ray);
-			//lightValue *= CalculatePointLightShadowOnly(hitdata, ray);
+			lightValue = CalculatePointLightLightingOnly(hitdata, ray);
+			lightValue *= CalculatePointLightShadowOnly(hitdata, ray);
 			if(hitdata.hitTriangle)
 				endColor += triangleColors[0] * lightValue;
 			else

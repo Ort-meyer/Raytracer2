@@ -94,25 +94,39 @@ Ray RayDirection() // used to return vec3
 // Kommer inte kunna lösa problem om vi har två objekt efter varandra 
 
 
-Hitdata RayPwnSphere(vec3 rayPos, vec3 rayDir, vec3 spherePos, float sphereRad)
+Hitdata RayPwnSphere(vec3 rayPos, vec3 rayDir, vec3 spherePos, float sphereRad, Hitdata hitdata, int thisIndex)
 {
 	float b = dot(rayDir, rayPos - spherePos);
 	float c = dot((rayPos - spherePos), (rayPos - spherePos)) - pow(sphereRad, 2.0f);
 	// float c = 1 - pow(sphereRad, 2.0f); // Shortened. Should work
 
 	float f = pow(b, 2.0f) - c;
-	
-	Hitdata hitdata;
 
-	hitdata.hit = f >= 0.0f ? true : false;
+	//hitdata.hit = f >= 0.0f ? true : false;
+	if(f < 0.0f)
+		return hitdata; // Was a miss
 	
 
-	if(hitdata.hit)
+	hitdata.t1 = -b - sqrt(f);
+	hitdata.t2 = -b + sqrt(f);
+
+	if(hitdata.t1 < 0 || hitdata.t2 < 0)
 	{
-		hitdata.t1 = -b - sqrt(f);
-		hitdata.t2 = -b + sqrt(f);
+		return hitdata;
 	}
-	if(hitdata.t1 > 0 && hitdata.t2 > 0) // Does not work if we're inside a sphere
+	float t = min(hitdata.t1, hitdata.t2);
+	if(t < hitdata.hitDistance) // New sphere is closer
+	{
+		hitdata.hitDistance = t;
+		hitdata.position = rayPos + rayDir * hitdata.hitDistance;
+		hitdata.normal = normalize(hitdata.position - spherePos);
+		hitdata.hitTriangle = false;
+		hitdata.hitIndex = thisIndex;
+		hitdata.hit = true;
+	}
+
+
+	/*if(hitdata.t1 > 0 && hitdata.t2 > 0) // Does not work if we're inside a sphere
 	{	
 		hitdata.hitDistance = hitdata.t1;
 		if(hitdata.t1 > hitdata.t2)
@@ -121,16 +135,13 @@ Hitdata RayPwnSphere(vec3 rayPos, vec3 rayDir, vec3 spherePos, float sphereRad)
 		// Calculate position and normal
 		hitdata.position = rayPos + rayDir * hitdata.hitDistance;
 		hitdata.normal = normalize(hitdata.position - spherePos);
-	}
-	else
-		hitdata.hit = false;
+	}*/
 
 	return hitdata;
 }
 // taken from http://stackoverflow.com/questions/13655457/raytracing-ray-triangle-intersection
 Hitdata RayPwnTriangle(Ray ray, vec3 p0, vec3 p1, vec3 p2, Hitdata hitdata)
 {
-	hitdata.hit = false;
 
 	vec3 e1 = p1 - p0;
 	vec3 e2 = p2 - p0;
@@ -178,46 +189,43 @@ Hitdata ComputeHit(Ray ray, Hitdata p_hitdata, bool shadow)
 	// Iterate through all spheres
 	for(int i = 0; i < numSpheres ; i++)
 	{
-		//if(!shadow || (shadow && p_hitdata.hitIndex != i))// && !p_hitdata.hitTriangle)) // This is ugly...
+		hitdata = RayPwnSphere(ray.pos, ray.dir, spherePositions[i], sphereRadii[i], hitdata, i);
+
+
+
+
+
+		/*Hitdata t_hitdata = RayPwnSphere(ray.pos, ray.dir, spherePositions[i], sphereRadii[i]);
+		if(t_hitdata.hit && hitdata.hitDistance > t_hitdata.hitDistance && hitdata.hitDistance > 0)
 		{
-	
-			Hitdata t_hitdata = RayPwnSphere(ray.pos, ray.dir, spherePositions[i], sphereRadii[i]);
-			if(t_hitdata.hit && hitdata.hitDistance > t_hitdata.hitDistance && hitdata.hitDistance > 0)
-			{
-				hitdata = t_hitdata;
-				hitdata.hitTriangle = false;
-				hitdata.hitIndex = i;
-			}
-		}
+			hitdata = t_hitdata;
+			hitdata.hitTriangle = false;
+			hitdata.hitIndex = i;
+		}*/
 	}
 
 	// Iterate through all triangles
-	for(int i = 0; i < numTrianglePositions; i+=3)
+	/*for(int i = 0; i < numTrianglePositions; i+=3)
 	{
-		//if(!shadow || (shadow && p_hitdata.hitIndex != i && p_hitdata.hitTriangle))
+		Hitdata t_hitdata;
+		t_hitdata = RayPwnTriangle(ray, trianglePositions[i], trianglePositions[i+1], trianglePositions[i+2], t_hitdata);
+		if(t_hitdata.hit && hitdata.hitDistance > t_hitdata.hitDistance && hitdata.hitDistance > 0)
 		{
-			Hitdata t_hitdata;
-			t_hitdata = RayPwnTriangle(ray, trianglePositions[i], trianglePositions[i+1], trianglePositions[i+2], t_hitdata);
-			if(t_hitdata.hit && hitdata.hitDistance > t_hitdata.hitDistance && hitdata.hitDistance > 0)
+			if(!(shadow && i < 36))
 			{
-				if(!(shadow && i < 36))
-				{
-					hitdata = t_hitdata;
-					hitdata.hitTriangle = true;
-					hitdata.hitIndex = i / 3;
-				}
+				hitdata = t_hitdata;
+				hitdata.hitTriangle = true;
+				hitdata.hitIndex = i / 3;
 			}
 		}
 	}
 	// Now iterate through all triangles in ssbo. Yup, this is smart
-	//for(int i = 0; i < 6; i+=3)
 	for(int i = 0; i < 400; i+=9)
 	{
 		Hitdata t_hitdata;
 		vec3 p0 = vec3(bthCorners[i], bthCorners[i+1], bthCorners[i+2]);
 		vec3 p1 = vec3(bthCorners[i+3], bthCorners[i+4], bthCorners[i+5]);
 		vec3 p2 = vec3(bthCorners[i+6], bthCorners[i+7], bthCorners[i+8]);
-		//t_hitdata = RayPwnTriangle(ray, bthCorners[i], bthCorners[i+1], bthCorners[i+2], t_hitdata);
 		t_hitdata = RayPwnTriangle(ray, p0,p1,p2, t_hitdata);
 		if(t_hitdata.hit && hitdata.hitDistance > t_hitdata.hitDistance && hitdata.hitDistance > 0)
 		{
@@ -225,7 +233,7 @@ Hitdata ComputeHit(Ray ray, Hitdata p_hitdata, bool shadow)
 			hitdata.hitTriangle = true;
 			hitdata.hitIndex = i / 3;
 		}
-	}
+	}*/
 
 	return hitdata;
 }

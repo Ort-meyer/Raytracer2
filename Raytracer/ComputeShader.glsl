@@ -140,7 +140,7 @@ Hitdata RayPwnSphere(vec3 rayPos, vec3 rayDir, vec3 spherePos, float sphereRad, 
 	return hitdata;
 }
 // taken from http://stackoverflow.com/questions/13655457/raytracing-ray-triangle-intersection
-Hitdata RayPwnTriangle(Ray ray, vec3 p0, vec3 p1, vec3 p2, Hitdata hitdata)
+Hitdata RayPwnTriangle(Ray ray, vec3 p0, vec3 p1, vec3 p2, Hitdata hitdata, int thisIndex)
 {
 
 	vec3 e1 = p1 - p0;
@@ -149,6 +149,8 @@ Hitdata RayPwnTriangle(Ray ray, vec3 p0, vec3 p1, vec3 p2, Hitdata hitdata)
 	vec3 p = cross(ray.dir, e2);
 	e1e2 = normalize(e1e2);
 	float a = dot(e1, p);
+
+
 	if(a < 0.000001)
 	{
 		return hitdata;
@@ -166,16 +168,20 @@ Hitdata RayPwnTriangle(Ray ray, vec3 p0, vec3 p1, vec3 p2, Hitdata hitdata)
 	if(v < 0.0 || u+v > 1.0)
 	{
 		return hitdata;
-		
 	}
 	
 	float t = f * dot(e2, q);
-	
-	hitdata.hitDistance = t;
-	hitdata.normal = e1e2;
-	hitdata.position = ray.pos + ray.dir * t;
-	if(hitdata.hitDistance > 0)
+
+	if(t < hitdata.hitDistance && t > 0)
+	{
 		hitdata.hit = true;
+		hitdata.hitDistance = t;
+		hitdata.hitTriangle = true;
+		hitdata.hitIndex = thisIndex;
+		hitdata.normal = e1e2;
+		hitdata.position = ray.pos + ray.dir * t;
+	}
+
 	return hitdata;
 }
 
@@ -187,21 +193,9 @@ Hitdata ComputeHit(Ray ray, Hitdata p_hitdata, bool shadow)
 	hitdata.hitDistance = 100000;
 
 	// Iterate through all spheres
-	for(int i = 0; i < numSpheres ; i++)
+	for(int i = 0; i < numSpheres ; ++i)
 	{
 		hitdata = RayPwnSphere(ray.pos, ray.dir, spherePositions[i], sphereRadii[i], hitdata, i);
-
-
-
-
-
-		/*Hitdata t_hitdata = RayPwnSphere(ray.pos, ray.dir, spherePositions[i], sphereRadii[i]);
-		if(t_hitdata.hit && hitdata.hitDistance > t_hitdata.hitDistance && hitdata.hitDistance > 0)
-		{
-			hitdata = t_hitdata;
-			hitdata.hitTriangle = false;
-			hitdata.hitIndex = i;
-		}*/
 	}
 
 	// Iterate through all triangles
@@ -218,22 +212,16 @@ Hitdata ComputeHit(Ray ray, Hitdata p_hitdata, bool shadow)
 				hitdata.hitIndex = i / 3;
 			}
 		}
-	}
+	}*/
 	// Now iterate through all triangles in ssbo. Yup, this is smart
 	for(int i = 0; i < 400; i+=9)
 	{
-		Hitdata t_hitdata;
 		vec3 p0 = vec3(bthCorners[i], bthCorners[i+1], bthCorners[i+2]);
 		vec3 p1 = vec3(bthCorners[i+3], bthCorners[i+4], bthCorners[i+5]);
 		vec3 p2 = vec3(bthCorners[i+6], bthCorners[i+7], bthCorners[i+8]);
-		t_hitdata = RayPwnTriangle(ray, p0,p1,p2, t_hitdata);
-		if(t_hitdata.hit && hitdata.hitDistance > t_hitdata.hitDistance && hitdata.hitDistance > 0)
-		{
-			hitdata = t_hitdata;
-			hitdata.hitTriangle = true;
-			hitdata.hitIndex = i / 3;
-		}
-	}*/
+
+		hitdata = RayPwnTriangle(ray, p0,p1,p2, hitdata, i/9);
+	}
 
 	return hitdata;
 }

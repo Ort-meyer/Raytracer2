@@ -49,7 +49,7 @@ vector<Triangle> ModelLoader::LoadModel(const char * p_fileName)
             vec3 t_position;
             fscanf_s(t_file, "%f %f %f\n", &t_position.x, &t_position.y, &t_position.z);
             mat4x4 t_scaleMat = scale(vec3(0.1, 0.1, 0.1));
-            t_positions.push_back(vec3(t_scaleMat * vec4(t_position,0)));
+            t_positions.push_back(vec3(0,0,1) + vec3(t_scaleMat * vec4(t_position,0)));
         }
         // Load texture coordinates
         else if (strcmp(t_lineHeader, "vt") == 0)

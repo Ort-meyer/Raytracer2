@@ -73,9 +73,13 @@ void World::SetupWorld()
 	//m_spheres.push_back(new Sphere(vec3(0, 0, 0), vec3(0, 1, 0), 0.25f));
 	//m_spheres.push_back(new Sphere(vec3(0, 1, 0), vec3(1, 0, 1), 0.10f));
 	//m_spheres.push_back(new Sphere(vec3(0, 4, 0), vec3(1, 0, 0), 0.7f));
-	m_spheres.push_back(new Sphere(vec3(-1, -1, -1), vec3(0, 0, 1), 0.1f));
-	m_spheres.push_back(new Sphere(vec3(1, -1, -1), vec3(0, 1, 0), 0.1f));
 	m_spheres.push_back(new Sphere(vec3(1, -1, 1), vec3(1, 0, 0), 0.1f));
+	m_spheres.push_back(new Sphere(vec3(-1, -1, -1), vec3(1, 0, 0), 0.1f));
+	m_spheres.push_back(new Sphere(vec3(1, -1, -1), vec3(1, 0, 0), 0.1f));
+	m_spheres.push_back(new Sphere(vec3(1, 1, -1), vec3(1, 1, 1), 0.1f));
+	m_spheres.push_back(new Sphere(vec3(1, 1, 1.5f), vec3(0, 0, 1), 0.1f));
+	m_spheres.push_back(new Sphere(vec3(1.5f, -0.5f, -0.5f), vec3(1, 0, 1), 0.1f));
+	m_spheres.push_back(new Sphere(vec3(0.5f, -0.5f, -0.5f), vec3(1, 1, 0), 0.1f));
 	//Red sphere is kinda buggy. might have to do with length
 
 	//m_spheres.push_back(new Sphere(vec3(0, -0.8, 0), 0.25f));

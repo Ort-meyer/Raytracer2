@@ -20,15 +20,18 @@ uniform int numLights;
 uniform vec3[50] diffuseLightingDirections;
 uniform int numDiffuseLights;
 //Spheres
-uniform vec3[5] spherePositions; // Maximum of of 5 spheres
-uniform float[5] sphereRadii;
-uniform vec3 [5] sphereColors;
+uniform vec3[10] spherePositions; // Maximum of of 5 spheres
+uniform float[10] sphereRadii;
+uniform vec3 [10] sphereColors;
 uniform int numSpheres;
 
 //Triangles
 uniform vec3[3*40] trianglePositions; // 3 corners times maximum of 10 triangles
 uniform vec3[40] triangleColors;
 uniform int numTrianglePositions;
+
+const int numTrianglesRendered = 2000;
+const int numBounces = 0;
 
 //BTH logo buffer
 layout (std430, binding = 2) buffer shader_data
@@ -214,7 +217,7 @@ Hitdata ComputeHit(Ray ray, Hitdata p_hitdata, bool shadow)
 		}
 	}*/
 	// Now iterate through all triangles in ssbo. Yup, this is smart
-	for(int i = 0; i < 400; i+=9)
+	for(int i = 0; i < numTrianglesRendered; i+=9)
 	{
 		vec3 p0 = vec3(bthCorners[i], bthCorners[i+1], bthCorners[i+2]);
 		vec3 p1 = vec3(bthCorners[i+3], bthCorners[i+4], bthCorners[i+5]);
@@ -254,7 +257,7 @@ float CalculateLightStrength(vec3 vertexToEye, vec3 lightDirection, vec3 hitNorm
 float CalculatePointLightLightingOnly(Hitdata hitdata, Ray ray)
 {
 	float lightFactorColor = 0.1; // some ambient
-	for(int i = 0; i < numLights; i++)
+	for(int i = 0; i < numLights; ++i)
 	{
 		vec3 lightDirection =  hitdata.position - lightPositions[i];
 		float distance = length(lightDirection);
@@ -289,7 +292,7 @@ float CalculatePointLightLightingOnly(Hitdata hitdata, Ray ray)
 		lightFactorColor += CalculateLightStrength(normalize(cameraPosition - hitdata.position), diffuseLightingDirections[i], hitdata.normal);
 	}
 	// Ensure there's always ambience
-	lightFactorColor = clamp(lightFactorColor, 0.4f, 1.0f);
+	lightFactorColor = clamp(lightFactorColor, 0.1f, 1.0f);
 	return lightFactorColor;
 }
 float CalculatePointLightShadowOnly(Hitdata hitdata, Ray ray)
@@ -350,7 +353,7 @@ void main()
 
 	// Bounce new shit
 	vec3 endColor = vec3(0,0,0);
-	for(int i = 0; i < 2; i++)
+	for(int i = 0; i < numBounces+1; i++)
 	{
 		float lightValue = 0;
 		Hitdata hitdata = ComputeHit(ray, derp, false);
@@ -380,71 +383,3 @@ void main()
 
 	imageStore(destTex, storePos, vec4(endColor.xyz,0));
 }
-
-
-//// Calculates light value of pixel
-//// Light computation from http://gamedev.stackexchange.com/questions/56897/glsl-light-attenuation-color-and-intensity-formula
-//float CalculatePointLightLighting(Hitdata hitdata, Ray ray)
-//{
-//	float lightFactorColor = 0.1; // some ambient
-//	for(int i = 0; i < numLights; i++)
-//	{
-//		// vector between light and where the ray hit an object
-//		vec3 hitLightVector = lightPositions[i] - hitdata.position;
-//		// "Angle" between hitLightVector and normal of hit
-//		float normalLightDot = dot(hitdata.normal, hitLightVector);
-//		
-//		// Check if hit is on the "right side" of the light
-//		if(normalLightDot > 0)
-//		{		
-//			// First, see if there's anything in the way.
-//			Ray shadowRay;
-//			shadowRay.dir = normalize(hitLightVector);
-//			shadowRay.pos = hitdata.position;
-//			Hitdata shadowHitdata = ComputeHit(shadowRay, hitdata, true);
-//			// Hitdata och hitdistance går inte alltid att lita på.
-//			if(shadowHitdata.hit && length(shadowHitdata.position - shadowRay.pos) <= length(hitLightVector))
-//			{
-//				lightFactorColor -= 0.7; // How shadowy shadows become
-//				
-//			}
-//
-//			// There wasn't anything in the way
-//			else
-//			{
-//				if(false)
-//				{
-//					float cutoffDistance = 5;
-//					float lightDistance = length(hitLightVector);
-//					if(lightDistance < 1000)
-//					{
-//						float aFactor = 0.1;
-//						float bFactor = 0.01;
-//						float cFactor = 0.4;
-//						float attenuation = 1 / (1 + aFactor * lightDistance + bFactor * lightDistance * lightDistance);
-//						float dcont = max(0.0, normalLightDot);
-//						lightFactorColor += attenuation * (dcont+cFactor);
-//					}
-//				}
-//
-//
-//				else
-//				{
-//					float lightIntensity = clamp(normalLightDot, 0, 1);
-//
-//
-//
-//					// Wasn't anything in the way. It's illuminated
-//					float currentLightColorFactor = normalLightDot;
-//					float inverseLightStrength = 0.15;
-//					currentLightColorFactor *= 1 - length(hitLightVector) * inverseLightStrength; // This is for light cutoff 
-//					lightFactorColor += clamp(currentLightColorFactor, 0, 1);
-//				}
-//			}
-//		}
-//		
-//	}
-//	// Ensure there's always ambience
-//	lightFactorColor = clamp(lightFactorColor, 0.4f, 1.0f);
-//	return lightFactorColor;
-//}

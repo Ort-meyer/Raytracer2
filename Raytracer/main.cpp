@@ -110,10 +110,10 @@ void RenderScene()
 	}
 
 	// BTH ssbo thingies
-	GLuint block_index = 0;
-	block_index = glGetProgramResourceIndex(g_computeProgramHandle, GL_SHADER_STORAGE_BLOCK, "shader_data");
-	GLuint ssbo_binding_point_index = 2;
-	glShaderStorageBlockBinding(g_computeProgramHandle, block_index, ssbo_binding_point_index);
+	//GLuint block_index = 0;
+	//block_index = glGetProgramResourceIndex(g_computeProgramHandle, GL_SHADER_STORAGE_BLOCK, "shader_data");
+	//GLuint ssbo_binding_point_index = 2;
+	//glShaderStorageBlockBinding(g_computeProgramHandle, block_index, ssbo_binding_point_index);
 
 	// Start compute
 	glDispatchCompute(1024 / 16, 768 / 16, 1);
@@ -145,6 +145,11 @@ void CreateObjSSBO()
 			t_bthCorners.push_back(t_bthTriangles[i].m_corners[j]);
 		}
 	}
+
+	GLuint block_index = 0;
+	block_index = glGetProgramResourceIndex(g_computeProgramHandle, GL_SHADER_STORAGE_BLOCK, "shader_data");
+	GLuint ssbo_binding_point_index = 2;
+	glShaderStorageBlockBinding(g_computeProgramHandle, block_index, ssbo_binding_point_index);
 	
 	// Bind data to buffer
 	//glBufferData(GL_SHADER_STORAGE_BUFFER, t_bthCorners.size() * sizeof(vec3), &t_bthCorners[0], GL_DYNAMIC_COPY);
@@ -225,7 +230,7 @@ int main(int argc, char** argv)
 	g_computeProgramHandle = My_CreateShaderprogram(t_computeShaders);
 
 	// Create the camera
-	g_camera = new Camera(vec3(0, 0, 1), vec3(0, 1, 0), vec3(0, 0, 0));
+	g_camera = new Camera(vec3(0, 0, 1), vec3(0, 1, 0), vec3(1, -1, -3));
 	
 	// CreateWorld
 	g_world = new World();

@@ -30,8 +30,8 @@ uniform vec3[3*40] trianglePositions; // 3 corners times maximum of 10 triangles
 uniform vec3[40] triangleColors;
 uniform int numTrianglePositions;
 
-const int numTrianglesRendered = 2000;
-const int numBounces = 0;
+const int numTrianglesRendered = 24;
+const int numBounces = 8;
 
 //BTH logo buffer
 layout (std430, binding = 2) buffer shader_data
@@ -54,11 +54,8 @@ struct Ray
 struct Hitdata
 {
 	bool hit;
-	float hitDistance;
 	vec3 normal;
 	vec3 position;
-	bool hitTriangle; // debuggy
-	int hitIndex; // debuggy
 };
 
 Ray RayDirection() // used to return vec3
@@ -86,7 +83,7 @@ Ray RayDirection() // used to return vec3
 // Kommer inte kunna lösa problem om vi har två objekt efter varandra 
 
 
-Hitdata RayPwnSphere(vec3 rayPos, vec3 rayDir, vec3 spherePos, float sphereRad, Hitdata hitdata, int thisIndex)
+float RayPwnSphere(vec3 rayPos, vec3 rayDir, vec3 spherePos, float sphereRad)
 {
 	float b = dot(rayDir, rayPos - spherePos);
 	float c = dot((rayPos - spherePos), (rayPos - spherePos)) - pow(sphereRad, 2.0f);
@@ -94,44 +91,35 @@ Hitdata RayPwnSphere(vec3 rayPos, vec3 rayDir, vec3 spherePos, float sphereRad, 
 	float f = pow(b, 2.0f) - c;
 
 	if(f < 0.0f)
-		return hitdata; // Was a miss
+		return -1; // Was a miss
 	
 	
 	float t1 = -b - sqrt(f);
 	float t2 = -b + sqrt(f);
 	
-	if(t1 < 0 || t2 < 0)
+	if(t1 < 0 || t2 < 0) // Risky?
 	{
-		return hitdata;
+		return -1;
 	}
 
 	float t = min(t1, t2);
-	if(t < hitdata.hitDistance) // New sphere is closer
-	{
-		hitdata.hitDistance = t;
-		hitdata.position = rayPos + rayDir * hitdata.hitDistance;
-		hitdata.normal = normalize(hitdata.position - spherePos);
-		hitdata.hitTriangle = false;
-		hitdata.hitIndex = thisIndex;
-		hitdata.hit = true;
-	}
+		return t;
 	
-	return hitdata;
 }
 // taken from http://stackoverflow.com/questions/13655457/raytracing-ray-triangle-intersection
-Hitdata RayPwnTriangle(Ray ray, vec3 p0, vec3 p1, vec3 p2, Hitdata hitdata, int thisIndex)
+float RayPwnTriangle(Ray ray, vec3 p0, vec3 p1, vec3 p2)
 {
 	vec3 e1 = p1 - p0;
 	vec3 e2 = p2 - p0;
-	vec3 e1e2 = cross(e1, e2);
+	//vec3 e1e2 = cross(e1, e2);
 	vec3 p = cross(ray.dir, e2);
-	e1e2 = normalize(e1e2);
+	//e1e2 = normalize(e1e2);
 	float a = dot(e1, p);
 
 
 	if(a < 0.000001)
 	{
-		return hitdata;
+		return -1;
 	}
 	
 	float f = 1 / a;
@@ -139,41 +127,40 @@ Hitdata RayPwnTriangle(Ray ray, vec3 p0, vec3 p1, vec3 p2, Hitdata hitdata, int 
 	float u = f*(dot(s, p));
 	if(u < 0.0 || u > 1.0)
 	{
-		return hitdata;
+		return -1;
 	}
 	vec3 q = cross(s, e1);
 	float v = f * dot(ray.dir, q);
 	if(v < 0.0 || u+v > 1.0)
 	{
-		return hitdata;
+		return -1;
 	}
 	
 	float t = f * dot(e2, q);
-
-	if(t < hitdata.hitDistance && t > 0)
-	{
-		hitdata.hit = true;
-		hitdata.hitDistance = t;
-		hitdata.hitTriangle = true;
-		hitdata.hitIndex = thisIndex;
-		hitdata.normal = e1e2;
-		hitdata.position = ray.pos + ray.dir * t;
-	}
-
-	return hitdata;
+	return t;
 }
 
 // Big method that iterates through each geometry and returns hit data for the object we hit
-Hitdata ComputeHit(Ray ray, Hitdata p_hitdata, bool shadow)
+Hitdata ComputeHit(Ray ray)
 {
+
+	float hitDistance = 1000000;
+
 	Hitdata hitdata;
 	hitdata.hit = false;
-	hitdata.hitDistance = 100000;
 
 	// Iterate through all spheres
 	for(int i = 0; i < numSpheres ; ++i)
 	{
-		hitdata = RayPwnSphere(ray.pos, ray.dir, spherePositions[i], sphereRadii[i], hitdata, i);
+		float t = RayPwnSphere(ray.pos, ray.dir, spherePositions[i], sphereRadii[i]);
+		if(t>0 && t < hitDistance)
+		{
+			// MOVE THIS SHIT OUT AND DO AT THE END??
+			hitDistance = t;
+			hitdata.hit = true;
+			hitdata.position = ray.pos + ray.dir * t;
+			hitdata.normal = normalize(hitdata.position - spherePositions[i]);
+		}
 	}
 
 	// Now iterate through all triangles in ssbo. Yup, this is smart
@@ -183,8 +170,17 @@ Hitdata ComputeHit(Ray ray, Hitdata p_hitdata, bool shadow)
 		vec3 p1 = vec3(bthCorners[i+3], bthCorners[i+4], bthCorners[i+5]);
 		vec3 p2 = vec3(bthCorners[i+6], bthCorners[i+7], bthCorners[i+8]);
 
-
-		hitdata = RayPwnTriangle(ray, p0,p1,p2, hitdata, i/9);
+		
+		float t = RayPwnTriangle(ray, p0,p1,p2);
+		if(t > 0 && t < hitDistance)
+		{
+			// MOVE THIS SHIT OUT AND DO AT THE END??
+			hitDistance = t;
+			vec3 normal = normalize(cross((p1-p0), (p2-p0)));
+			hitdata.normal = normal;
+			hitdata.hit = true;
+			hitdata.position = ray.pos + ray.dir * t;
+		}
 	}
 
 	return hitdata;
@@ -273,7 +269,7 @@ float CalculatePointLightShadowOnly(Hitdata hitdata, Ray ray)
 			Ray shadowRay;
 			shadowRay.dir = normalize(hitLightVector);
 			shadowRay.pos = hitdata.position;
-			Hitdata shadowHitdata = ComputeHit(shadowRay, hitdata, true);
+			Hitdata shadowHitdata = ComputeHit(shadowRay);
 			// Hitdata och hitdistance går inte alltid att lita på.
 			if(shadowHitdata.hit && length(shadowHitdata.position - shadowRay.pos) <= length(hitLightVector))
 			{
@@ -289,7 +285,7 @@ float CalculatePointLightShadowOnly(Hitdata hitdata, Ray ray)
 			Ray shadowRay;
 			shadowRay.dir = - diffuseLightingDirections[i];
 			shadowRay.pos = hitdata.position;
-			Hitdata shadowHitdata = ComputeHit(shadowRay, hitdata, true);
+			Hitdata shadowHitdata = ComputeHit(shadowRay);
 			if(shadowHitdata.hit)
 			{
 				lightFactorColor *= 0.5; // How shadowy shadows become
@@ -316,27 +312,25 @@ void main()
 
 	// Bounce new shit
 	vec3 endColor = vec3(0,0,0);
-	for(int i = 0; i < numBounces+1; i++)
+	for(int i = 0; i < numBounces + 1; i++)
 	{
 		float lightValue = 0;
-		Hitdata hitdata = ComputeHit(ray, derp, false);
+		Hitdata hitdata = ComputeHit(ray);
 		if(hitdata.hit)
 		{
 			lightValue = 0.5;
 			lightValue = CalculatePointLightLightingOnly(hitdata, ray);
 			lightValue *= CalculatePointLightShadowOnly(hitdata, ray);
-			if(hitdata.hitTriangle)
-				endColor += triangleColors[0] * lightValue;
-			else
-				endColor += sphereColors[hitdata.hitIndex] * lightValue;
-			//endColor += vec3(1,0,0) * lightValue;
+
+			endColor += vec3(1,0,0) * lightValue;
+
 			// Change ray for bounce
 			ray.pos = hitdata.position;
 			ray.dir = normalize(reflect(normalize(ray.dir), normalize(hitdata.normal)));
 
 		}
-		//else
-			//break;
+		else
+			break;
 	}
 
 	ivec2 storePos = ivec2(gl_GlobalInvocationID.xy);

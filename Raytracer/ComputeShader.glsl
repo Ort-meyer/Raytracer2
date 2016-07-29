@@ -49,27 +49,16 @@ struct Ray
 {
 	vec3 dir;
 	vec3 pos;
-	bool DEBUG;
 };
 
 struct Hitdata
 {
-	float t1;
-	float t2;
 	bool hit;
 	float hitDistance;
 	vec3 normal;
 	vec3 position;
 	bool hitTriangle; // debuggy
 	int hitIndex; // debuggy
-};
-
-// Copy pasted from 3D lab 1
-struct Triangle
-{
-	vec3 p0;
-	vec3 p1;
-	vec3 p2;
 };
 
 Ray RayDirection() // used to return vec3
@@ -101,23 +90,22 @@ Hitdata RayPwnSphere(vec3 rayPos, vec3 rayDir, vec3 spherePos, float sphereRad, 
 {
 	float b = dot(rayDir, rayPos - spherePos);
 	float c = dot((rayPos - spherePos), (rayPos - spherePos)) - pow(sphereRad, 2.0f);
-	// float c = 1 - pow(sphereRad, 2.0f); // Shortened. Should work
 
 	float f = pow(b, 2.0f) - c;
 
-	//hitdata.hit = f >= 0.0f ? true : false;
 	if(f < 0.0f)
 		return hitdata; // Was a miss
 	
-
-	hitdata.t1 = -b - sqrt(f);
-	hitdata.t2 = -b + sqrt(f);
-
-	if(hitdata.t1 < 0 || hitdata.t2 < 0)
+	
+	float t1 = -b - sqrt(f);
+	float t2 = -b + sqrt(f);
+	
+	if(t1 < 0 || t2 < 0)
 	{
 		return hitdata;
 	}
-	float t = min(hitdata.t1, hitdata.t2);
+
+	float t = min(t1, t2);
 	if(t < hitdata.hitDistance) // New sphere is closer
 	{
 		hitdata.hitDistance = t;
@@ -127,25 +115,12 @@ Hitdata RayPwnSphere(vec3 rayPos, vec3 rayDir, vec3 spherePos, float sphereRad, 
 		hitdata.hitIndex = thisIndex;
 		hitdata.hit = true;
 	}
-
-
-	/*if(hitdata.t1 > 0 && hitdata.t2 > 0) // Does not work if we're inside a sphere
-	{	
-		hitdata.hitDistance = hitdata.t1;
-		if(hitdata.t1 > hitdata.t2)
-			hitdata.hitDistance = hitdata.t2;
-
-		// Calculate position and normal
-		hitdata.position = rayPos + rayDir * hitdata.hitDistance;
-		hitdata.normal = normalize(hitdata.position - spherePos);
-	}*/
-
+	
 	return hitdata;
 }
 // taken from http://stackoverflow.com/questions/13655457/raytracing-ray-triangle-intersection
 Hitdata RayPwnTriangle(Ray ray, vec3 p0, vec3 p1, vec3 p2, Hitdata hitdata, int thisIndex)
 {
-
 	vec3 e1 = p1 - p0;
 	vec3 e2 = p2 - p0;
 	vec3 e1e2 = cross(e1, e2);
@@ -201,27 +176,13 @@ Hitdata ComputeHit(Ray ray, Hitdata p_hitdata, bool shadow)
 		hitdata = RayPwnSphere(ray.pos, ray.dir, spherePositions[i], sphereRadii[i], hitdata, i);
 	}
 
-	// Iterate through all triangles
-	/*for(int i = 0; i < numTrianglePositions; i+=3)
-	{
-		Hitdata t_hitdata;
-		t_hitdata = RayPwnTriangle(ray, trianglePositions[i], trianglePositions[i+1], trianglePositions[i+2], t_hitdata);
-		if(t_hitdata.hit && hitdata.hitDistance > t_hitdata.hitDistance && hitdata.hitDistance > 0)
-		{
-			if(!(shadow && i < 36))
-			{
-				hitdata = t_hitdata;
-				hitdata.hitTriangle = true;
-				hitdata.hitIndex = i / 3;
-			}
-		}
-	}*/
 	// Now iterate through all triangles in ssbo. Yup, this is smart
 	for(int i = 0; i < numTrianglesRendered; i+=9)
 	{
 		vec3 p0 = vec3(bthCorners[i], bthCorners[i+1], bthCorners[i+2]);
 		vec3 p1 = vec3(bthCorners[i+3], bthCorners[i+4], bthCorners[i+5]);
 		vec3 p2 = vec3(bthCorners[i+6], bthCorners[i+7], bthCorners[i+8]);
+
 
 		hitdata = RayPwnTriangle(ray, p0,p1,p2, hitdata, i/9);
 	}
@@ -239,11 +200,11 @@ float CalculateLightStrength(vec3 vertexToEye, vec3 lightDirection, vec3 hitNorm
 	float diffuseFactor = dot(hitNormal, -lightDirection) * diffuseIntensity;
 	// 
 	float specularFactor = 0.0f;
-	if(diffuseFactor > 0)
+	//if(diffuseFactor > 0)
 	{
 		vec3 lightReflect = normalize(reflect(lightDirection, hitNormal));
 		specularFactor = dot(vertexToEye, lightReflect);
-		if(specularFactor > 0)
+		//if(specularFactor > 0)
 		{
 			specularFactor = matSpecularIntensity * pow(specularFactor, specularPower);
 		}
@@ -262,30 +223,30 @@ float CalculatePointLightLightingOnly(Hitdata hitdata, Ray ray)
 		vec3 lightDirection =  hitdata.position - lightPositions[i];
 		float distance = length(lightDirection);
 		lightDirection = normalize(lightDirection);
-
+		
 		float lightValue = CalculateLightStrength(cameraPosition - hitdata.position, lightDirection, hitdata.normal);
-
-		float constant = 0.1;
-		float linear = 0.1;
-		float exponant = 0.1;
-
-		float attenuation = constant + linear * distance + exponant * distance * distance;
-
-		lightFactorColor += lightValue / attenuation;
-
+		
+		//float constant = 0.1;
+		//float linear = 0.1;
+		//float exponant = 0.1;
+		
+		//float attenuation = constant + linear * distance + exponant * distance * distance;
+		//float attenuation = 0.1 + 0.1 * distance + 0.1 * distance * distance;
+		
+		//lightFactorColor += lightValue / attentuation;
+		lightFactorColor += lightValue / (0.1 + 0.1 * distance + 0.1 * distance * distance);
+		
 		// vector between light and where the ray hit an object
 		vec3 hitLightVector = lightPositions[i] - hitdata.position;
 		// "Angle" between hitLightVector and normal of hit
 		float normalLightDot = dot(hitdata.normal, hitLightVector);
 		
-		// Check if hit is on the "right side" of the light
-		if(true)//normalLightDot > 0)
-		{
-			float inverseLightStrength = 0.145;
-			float currentLightColorFactor = normalLightDot;
-			currentLightColorFactor *= 1 - length(hitLightVector) * inverseLightStrength; // This is for light cutoff 
-			lightFactorColor += clamp(currentLightColorFactor, 0, 1);
-		}
+		//float inverseLightStrength = 0.145;
+		float currentLightColorFactor = normalLightDot;
+		//currentLightColorFactor *= 1 - length(hitLightVector) * inverseLightStrength; // This is for light cutoff 
+		currentLightColorFactor *= 1 - length(hitLightVector) * 0.145; // This is for light cutoff 
+		lightFactorColor += clamp(currentLightColorFactor, 0, 1);
+
 	}
 	for(int i = 0; i<numDiffuseLights; i++)
 	{
@@ -295,6 +256,7 @@ float CalculatePointLightLightingOnly(Hitdata hitdata, Ray ray)
 	lightFactorColor = clamp(lightFactorColor, 0.1f, 1.0f);
 	return lightFactorColor;
 }
+
 float CalculatePointLightShadowOnly(Hitdata hitdata, Ray ray)
 {
 
@@ -333,6 +295,7 @@ float CalculatePointLightShadowOnly(Hitdata hitdata, Ray ray)
 				lightFactorColor *= 0.5; // How shadowy shadows become
 			}
 		}
+		//lightFactorColor *= 0.5;
 
 	}
 	return lightFactorColor;
@@ -366,13 +329,14 @@ void main()
 				endColor += triangleColors[0] * lightValue;
 			else
 				endColor += sphereColors[hitdata.hitIndex] * lightValue;
+			//endColor += vec3(1,0,0) * lightValue;
 			// Change ray for bounce
 			ray.pos = hitdata.position;
 			ray.dir = normalize(reflect(normalize(ray.dir), normalize(hitdata.normal)));
 
 		}
-		else
-			break;
+		//else
+			//break;
 	}
 
 	ivec2 storePos = ivec2(gl_GlobalInvocationID.xy);

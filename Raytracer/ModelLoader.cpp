@@ -22,15 +22,19 @@ ModelLoader::~ModelLoader()
 
 vector<Triangle> ModelLoader::LoadModel(const char * p_fileName)
 {
-
-    //FILE* t_file = fopen(p_fileName, "r");
-    FILE* t_file;
-    //p_fileName = "test.txt";
-    fopen_s(&t_file, p_fileName, "r");
-    vector<vec3> t_positions;
+	vector<vec3> t_positions;
+	vector<vec2> t_texCoordsCorners;
 	vector<vec3> t_corners;
 	vector<vec2> t_texCoords;
-	vector<vec2> t_texCoordsCorners;
+	t_positions.resize(0);
+	t_texCoordsCorners.resize(0);
+	t_corners.resize(0);
+	t_texCoords.resize(0);
+    //FILE* t_file = fopen(p_fileName, "r");
+    FILE* t_file;
+    //p_fileName = "test.txt";    
+    fopen_s(&t_file, p_fileName, "r");
+
 
     // Load all  positions of OBJ.
     while (true)
@@ -106,9 +110,9 @@ vector<Triangle> ModelLoader::LoadModel(const char * p_fileName)
 		t_cornersPos.push_back(t_corners[i+2]);
 
 		vector<vec2> t_texCorners;
-		t_texCoords.push_back(t_texCoordsCorners[i]);
-		t_texCoords.push_back(t_texCoordsCorners[i+1]);
-		t_texCoords.push_back(t_texCoordsCorners[i+2]);
+		t_texCorners.push_back(t_texCoordsCorners[i]);
+		t_texCorners.push_back(t_texCoordsCorners[i+1]);
+		t_texCorners.push_back(t_texCoordsCorners[i+2]);
 
         t_triangles.push_back(Triangle(t_cornersPos, t_texCorners,vec3(1,1,0)));
     }

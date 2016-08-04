@@ -36,9 +36,12 @@ const int numBounces = 1;
 //BTH logo buffer
 layout (std430, binding = 2) buffer shader_data
 {
-	//vec3 bthCorners[16368];
-	//float bthCorners[9];
-	float bthCorners[16368*3];
+	float bthCorners[500*3];
+};
+
+layout (std430, binding = 3) buffer texture_data
+{
+	float textureCorners[500*2];
 };
 
 // Hardcoded up-vector. used to figure out specific ups

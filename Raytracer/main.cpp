@@ -29,6 +29,7 @@ GLuint g_textureHandle;
 /// SSBOs
 // ssbo of bth logo
 GLuint g_bthSSBO = 0;
+GLuint g_textureSSBO = 0;
 
 /// Shader programs
 // Used to render the final picture
@@ -157,6 +158,30 @@ void CreateObjSSBO()
 	//glBufferData(GL_SHADER_STORAGE_BUFFER, 9*4, &fuckoff2, GL_DYNAMIC_COPY);
 	glBufferData(GL_SHADER_STORAGE_BUFFER, t_bthCorners.size() * sizeof(vec3), &t_bthCorners[0], GL_DYNAMIC_COPY);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, g_bthSSBO);
+
+
+	/// Now for texture
+	glGenBuffers(1, &g_textureSSBO);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, g_textureSSBO);
+	// Load model to triangles (should be changed, really)
+	// Get triangle corners into its own list
+	vector<vec2> t_textureCoordinates;
+	for (size_t i = 0; i < t_bthTriangles.size(); i++)
+	{
+		for (size_t j = 0; j < 3; j++)
+		{
+			t_textureCoordinates.push_back(t_bthTriangles[i].m_texCoords[j]);
+		}
+	}
+
+	block_index = 0;
+	block_index = glGetProgramResourceIndex(g_computeProgramHandle, GL_SHADER_STORAGE_BLOCK, "texture_data");
+	ssbo_binding_point_index = 3;
+	glShaderStorageBlockBinding(g_computeProgramHandle, block_index, ssbo_binding_point_index);
+
+	// Bind data to buffer
+	glBufferData(GL_SHADER_STORAGE_BUFFER, t_textureCoordinates.size() * sizeof(vec2), &t_textureCoordinates[0], GL_DYNAMIC_COPY);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, g_textureSSBO);
 }
 
 // Methods to handle keyboard input. Bound to glut callback

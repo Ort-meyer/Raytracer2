@@ -332,7 +332,9 @@ void main()
 			}
 			else
 			{
-				endColor += lightValue * vec3(0,1,0);//triangleColors[(-1*hitdata.hitIndex)-1];
+				//endColor += lightValue * vec3(0,1,0);//triangleColors[(-1*hitdata.hitIndex)-1];
+				//endColor += 1 * vec3(textureCorners[i*3], textureCorners[i*3+1], 0);
+				endColor = 1 * vec3(textureCorners[4], textureCorners[5], 0);
 			}
 
 			// Change ray for bounce

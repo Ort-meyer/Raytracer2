@@ -135,7 +135,7 @@ void CreateObjSSBO()
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, g_bthSSBO);
 	// Load model to triangles (should be changed, really)
 	ModelLoader t_modelLoader;
-	vector<Triangle> t_bthTriangles = t_modelLoader.LoadModel("bth.obj");
+	vector<Triangle> t_bthTriangles = t_modelLoader.LoadModel("cube.obj");
 	// Get triangle corners into its own list
 	vector<vec3> t_bthCorners;
 	for (size_t i = 0; i < t_bthTriangles.size(); i++)

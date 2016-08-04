@@ -136,16 +136,16 @@ void World::SetupWorld()
 	/// Create world room
 	mat4x4 t_roomScaleMat = scale(5.0f * vec3(1, 1, 1));
 	// Floor part
-	t_corners.clear();
-	t_corners.push_back(vec3(t_roomScaleMat * vec4(-1, -1, -1, 1)));
-	t_corners.push_back(vec3(t_roomScaleMat * vec4(-1, -1, 1, 1)));
-	t_corners.push_back(vec3(t_roomScaleMat * vec4(1, -1, 1, 1)));
-	m_triangles.push_back(new Triangle(t_corners, vec3(0, 0, 1)));
-	t_corners.clear();
-	t_corners.push_back(vec3(t_roomScaleMat * vec4(1, -1, 1, 1)));
-	t_corners.push_back(vec3(t_roomScaleMat * vec4(1, -1, -1, 1)));
-	t_corners.push_back(vec3(t_roomScaleMat * vec4(-1, -1, -1, 1)));
-	m_triangles.push_back(new Triangle(t_corners, vec3(0, 0, 1)));
+	//t_corners.clear();
+	//t_corners.push_back(vec3(t_roomScaleMat * vec4(-1, -1, -1, 1)));
+	//t_corners.push_back(vec3(t_roomScaleMat * vec4(-1, -1, 1, 1)));
+	//t_corners.push_back(vec3(t_roomScaleMat * vec4(1, -1, 1, 1)));
+	//m_triangles.push_back(new Triangle(t_corners, vec3(0, 0, 1)));
+	//t_corners.clear();
+	//t_corners.push_back(vec3(t_roomScaleMat * vec4(1, -1, 1, 1)));
+	//t_corners.push_back(vec3(t_roomScaleMat * vec4(1, -1, -1, 1)));
+	//t_corners.push_back(vec3(t_roomScaleMat * vec4(-1, -1, -1, 1)));
+	//m_triangles.push_back(new Triangle(t_corners, vec3(0, 0, 1)));
 	
 	// roof part
 	//t_corners.clear();

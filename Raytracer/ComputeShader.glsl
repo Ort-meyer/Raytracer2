@@ -30,8 +30,8 @@ uniform vec3[3*40] trianglePositions; // 3 corners times maximum of 10 triangles
 uniform vec3[40] triangleColors;
 uniform int numTrianglePositions;
 
-const int numTrianglesRendered = 24;
-const int numBounces = 8;
+const int numTrianglesRendered = 1000;
+const int numBounces = 1;
 
 //BTH logo buffer
 layout (std430, binding = 2) buffer shader_data
@@ -56,6 +56,7 @@ struct Hitdata
 	bool hit;
 	vec3 normal;
 	vec3 position;
+	int hitIndex;
 };
 
 Ray RayDirection() // used to return vec3
@@ -158,6 +159,7 @@ Hitdata ComputeHit(Ray ray)
 			// MOVE THIS SHIT OUT AND DO AT THE END??
 			hitDistance = t;
 			hitdata.hit = true;
+			hitdata.hitIndex = i+1;
 			hitdata.position = ray.pos + ray.dir * t;
 			hitdata.normal = normalize(hitdata.position - spherePositions[i]);
 		}
@@ -179,6 +181,7 @@ Hitdata ComputeHit(Ray ray)
 			vec3 normal = normalize(cross((p1-p0), (p2-p0)));
 			hitdata.normal = normal;
 			hitdata.hit = true;
+			hitdata.hitIndex  = -((i/9) + 1);
 			hitdata.position = ray.pos + ray.dir * t;
 		}
 	}
@@ -298,9 +301,6 @@ float CalculatePointLightShadowOnly(Hitdata hitdata, Ray ray)
 }
 
 
-
-
-
 void main()
 {
 	// Get this pixels ray
@@ -323,6 +323,14 @@ void main()
 			lightValue *= CalculatePointLightShadowOnly(hitdata, ray);
 
 			endColor += vec3(1,0,0) * lightValue;
+			if(hitdata.hitIndex > 0)
+			{
+				endColor += lightValue * sphereColors[hitdata.hitIndex-1];
+			}
+			else
+			{
+				endColor += lightValue * vec3(0,1,0);//triangleColors[(-1*hitdata.hitIndex)-1];
+			}
 
 			// Change ray for bounce
 			ray.pos = hitdata.position;

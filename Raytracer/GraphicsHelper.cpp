@@ -6,6 +6,9 @@
 #include <fstream>
 #include <string>
 
+// Third party libraries
+#include <Soil\SOIL.h>
+
 using namespace std;
 
 // "Private" help methods
@@ -52,6 +55,12 @@ GLuint My_GenerateTexture()
 	glBindImageTexture(0, t_textureHandle, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
 	return t_textureHandle;
+}
+
+GLuint My_LoadTexture(const char* p_fileName)
+{
+	GLuint t_texture = SOIL_load_OGL_texture(p_fileName, SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT);
+	return t_texture;
 }
 
 GLuint My_CreateShaderprogram(vector<ShaderInfo> p_programShaders)

@@ -14,6 +14,9 @@ using namespace std;
 // Loads a texture and returns the GLuint generated
 GLuint My_GenerateTexture();
 
+// Loads a texture from a file and returns GLuint to it
+GLuint My_LoadTexture(const char* p_fileName);
+
 struct ShaderInfo
 {
 	ShaderInfo(GLenum p_shaderType, string p_fileName)

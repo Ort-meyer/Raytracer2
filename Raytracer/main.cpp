@@ -250,6 +250,8 @@ int main(int argc, char** argv)
 	My_DEBUGDrawSurfaceVBCreation(g_renderProgramHandle);
 	// Load texture for draw surface
 	g_textureHandle = My_GenerateTexture();
+	// Load texture for box
+	g_boxTexture = My_LoadTexture("img_test.png");
 
 	// Load main compute shader
 	vector<ShaderInfo> t_computeShaders;

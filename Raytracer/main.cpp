@@ -112,6 +112,11 @@ void RenderScene()
 		glUniform1i(glGetUniformLocation(g_computeProgramHandle, "numTrianglePositions"), t_trianglePositions.size());
 	}
 
+	// Texture
+	glUniform1i(glGetUniformLocation(g_computeProgramHandle, "boxTextureSampler"), g_boxTexture);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, g_boxTexture);
+
 	// BTH ssbo thingies
 	//GLuint block_index = 0;
 	//block_index = glGetProgramResourceIndex(g_computeProgramHandle, GL_SHADER_STORAGE_BLOCK, "shader_data");

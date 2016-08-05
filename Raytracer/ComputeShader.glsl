@@ -30,6 +30,9 @@ uniform vec3[3*40] trianglePositions; // 3 corners times maximum of 10 triangles
 uniform vec3[40] triangleColors;
 uniform int numTrianglePositions;
 
+//Textures
+uniform sampler2D boxTextureSampler;
+
 const int numTrianglesRendered = 1000;
 const int numBounces = 1;
 

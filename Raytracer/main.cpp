@@ -25,6 +25,8 @@ static int turning = 0;
 /// Textures
 // Main texture on which raytrace output is stored
 GLuint g_textureHandle;
+// Texture for the boxes
+GLuint g_boxTexture;
 
 /// SSBOs
 // ssbo of bth logo
@@ -160,7 +162,7 @@ void CreateObjSSBO()
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, g_bthSSBO);
 
 
-	/// Now for texture
+	/// Now for texture coordinates
 	glGenBuffers(1, &g_textureSSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, g_textureSSBO);
 	// Load model to triangles (should be changed, really)

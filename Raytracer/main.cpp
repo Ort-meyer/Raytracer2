@@ -126,10 +126,10 @@ void RenderScene()
 	// Render the results
 	glUseProgram(g_renderProgramHandle);
 	glUniform1i(glGetUniformLocation(g_computeProgramHandle, "sourceTexture"), g_textureHandle);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, g_textureHandle);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
 	glutSwapBuffers();
-	turning = 0;
 }
 
 void CreateObjSSBO()

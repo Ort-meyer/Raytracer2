@@ -24,9 +24,9 @@ static int turning = 0;
 ///////////// Global variables (master main)
 /// Textures
 // Main texture on which raytrace output is stored
-GLuint g_textureHandle;
+GLuint g_computeOutputHandle;
 // Texture for the boxes
-GLuint g_boxTexture;
+GLuint g_cheryl;
 
 /// SSBOs
 // ssbo of bth logo
@@ -60,62 +60,81 @@ void RenderScene()
 	// Start with compute shader
 	glUseProgram(g_computeProgramHandle);
 
-	// We use texture 0, our only texture. Will probably have to be changed in the future
-	glUniform1i(glGetUniformLocation(g_computeProgramHandle, "outputTexture"), g_textureHandle);
-	// Send position and direction of camera 
-	glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "cameraPosition"), 1, &g_camera->m_position[0]);
-	glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "cameraDirection"), 1, &g_camera->m_target[0]);
-	// Send in frustum
-	glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "ray00"), 1, &g_camera->m_frustum.ray00[0]);
-	glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "ray10"), 1, &g_camera->m_frustum.ray10[0]);
-	glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "ray11"), 1, &g_camera->m_frustum.ray11[0]);
-	glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "ray01"), 1, &g_camera->m_frustum.ray01[0]);
+	//glUniform1i(glGetUniformLocation(g_computeProgramHandle, "outTex"), 0); // boxTextureSampler
 
-	// Send in light positions
-	vector<vec3> t_lightPositions;
-	g_world->GetPointLightInfor(t_lightPositions);
-	if (t_lightPositions.size() > 0)
-	{
-		glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "lightPositions"), t_lightPositions.size(), &t_lightPositions[0][0]);
-		glUniform1i(glGetUniformLocation(g_computeProgramHandle, "numLights"), t_lightPositions.size());
-	}
-
-	vector<vec3> t_diffuseLightingDirection;
-	g_world->GetDiffuseLighting(t_diffuseLightingDirection);
-	if (t_diffuseLightingDirection.size() > 0)
-	{
-		glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "diffuseLightingDirections"), t_diffuseLightingDirection.size(), &t_diffuseLightingDirection[0][0]);
-		glUniform1i(glGetUniformLocation(g_computeProgramHandle, "numDiffuseLights"), t_diffuseLightingDirection.size());
-	}
-	// Send in spheres
-	vector<vec3> t_spherePositions;
-	vector<float> t_sphereRadii;
-	vector<vec3> t_sphereColors;
-	g_world->GetSphereInfo(t_spherePositions, t_sphereRadii, t_sphereColors);
-	if (t_spherePositions.size() > 0)
-	{
-		glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "spherePositions"), t_spherePositions.size(), &t_spherePositions[0][0]);
-		glUniform1fv(glGetUniformLocation(g_computeProgramHandle, "sphereRadii"), t_sphereRadii.size(), &t_sphereRadii[0]);
-		glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "spherePositions"), t_spherePositions.size(), &t_spherePositions[0][0]);
-		glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "sphereColors"), t_sphereColors.size(), &t_sphereColors[0][0]);
-		glUniform1i(glGetUniformLocation(g_computeProgramHandle, "numSpheres"), t_spherePositions.size());
-	}
-
-	// Send in triangles
-	vector<vec3> t_trianglePositions;
-	vector<vec3> t_triangleColors;
-	g_world->GetTriangleInfo(t_trianglePositions, t_triangleColors);
-	if (t_trianglePositions.size() > 0)
-	{
-		glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "trianglePositions"), t_trianglePositions.size(), &t_trianglePositions[0][0]);
-		glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "triangleColors"), t_triangleColors.size(), &t_triangleColors[0][0]);
-		glUniform1i(glGetUniformLocation(g_computeProgramHandle, "numTrianglePositions"), t_trianglePositions.size());
-	}
-
-	// Texture
-	glUniform1i(glGetUniformLocation(g_computeProgramHandle, "boxTextureSampler"), g_boxTexture);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, g_boxTexture);
+	glBindImageTexture(0, g_computeOutputHandle, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+	glActiveTexture(GL_TEXTURE1);
+	glBindImageTexture(1, g_cheryl, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+	//glUniform1i(glGetUniformLocation(g_computeProgramHandle, "inTex"), 1); // boxTextureSampler
+
+
+
+
+	// BELOW STUFF IS IMPORTANT!!
+	//// We use texture 0, our only texture. Will probably have to be changed in the future
+	//// Texture
+	//glUniform1i(glGetUniformLocation(g_computeProgramHandle, "fdsgsadf"), g_computeOutputHandle); // destTex
+	//glUniform1i(glGetUniformLocation(g_computeProgramHandle, "gdfgs"), g_cheryl); // boxTextureSampler
+	//glActiveTexture(GL_TEXTURE0);
+	//glBindTexture(GL_TEXTURE_2D, g_computeOutputHandle);
+	//
+	//glActiveTexture(GL_TEXTURE1);
+	//glBindTexture(GL_TEXTURE_2D, g_cheryl);
+	//
+	//// Send position and direction of camera 
+	//glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "cameraPosition"), 1, &g_camera->m_position[0]);
+	//glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "cameraDirection"), 1, &g_camera->m_target[0]);
+	//// Send in frustum
+	//glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "ray00"), 1, &g_camera->m_frustum.ray00[0]);
+	//glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "ray10"), 1, &g_camera->m_frustum.ray10[0]);
+	//glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "ray11"), 1, &g_camera->m_frustum.ray11[0]);
+	//glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "ray01"), 1, &g_camera->m_frustum.ray01[0]);
+	//
+	//// Send in light positions
+	//vector<vec3> t_lightPositions;
+	//g_world->GetPointLightInfor(t_lightPositions);
+	//if (t_lightPositions.size() > 0)
+	//{
+	//	glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "lightPositions"), t_lightPositions.size(), &t_lightPositions[0][0]);
+	//	glUniform1i(glGetUniformLocation(g_computeProgramHandle, "numLights"), t_lightPositions.size());
+	//}
+	//
+	//vector<vec3> t_diffuseLightingDirection;
+	//g_world->GetDiffuseLighting(t_diffuseLightingDirection);
+	//if (t_diffuseLightingDirection.size() > 0)
+	//{
+	//	glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "diffuseLightingDirections"), t_diffuseLightingDirection.size(), &t_diffuseLightingDirection[0][0]);
+	//	glUniform1i(glGetUniformLocation(g_computeProgramHandle, "numDiffuseLights"), t_diffuseLightingDirection.size());
+	//}
+	//// Send in spheres
+	//vector<vec3> t_spherePositions;
+	//vector<float> t_sphereRadii;
+	//vector<vec3> t_sphereColors;
+	//g_world->GetSphereInfo(t_spherePositions, t_sphereRadii, t_sphereColors);
+	//if (t_spherePositions.size() > 0)
+	//{
+	//	glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "spherePositions"), t_spherePositions.size(), &t_spherePositions[0][0]);
+	//	glUniform1fv(glGetUniformLocation(g_computeProgramHandle, "sphereRadii"), t_sphereRadii.size(), &t_sphereRadii[0]);
+	//	glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "spherePositions"), t_spherePositions.size(), &t_spherePositions[0][0]);
+	//	glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "sphereColors"), t_sphereColors.size(), &t_sphereColors[0][0]);
+	//	glUniform1i(glGetUniformLocation(g_computeProgramHandle, "numSpheres"), t_spherePositions.size());
+	//}
+	//
+	//// Send in triangles
+	//vector<vec3> t_trianglePositions;
+	//vector<vec3> t_triangleColors;
+	//g_world->GetTriangleInfo(t_trianglePositions, t_triangleColors);
+	//if (t_trianglePositions.size() > 0)
+	//{
+	//	glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "trianglePositions"), t_trianglePositions.size(), &t_trianglePositions[0][0]);
+	//	glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "triangleColors"), t_triangleColors.size(), &t_triangleColors[0][0]);
+	//	glUniform1i(glGetUniformLocation(g_computeProgramHandle, "numTrianglePositions"), t_trianglePositions.size());
+	//}
+
+	
+	//glActiveTexture(GL_TEXTURE0);
+	//glBindTexture(GL_TEXTURE_2D, g_cheryl);
 
 	// BTH ssbo thingies
 	//GLuint block_index = 0;
@@ -129,10 +148,11 @@ void RenderScene()
 	/// END COMPUTE THINGIES
 
 	// Render the results
-	glUseProgram(g_renderProgramHandle);
-	glUniform1i(glGetUniformLocation(g_computeProgramHandle, "sourceTexture"), g_textureHandle);
+	glUseProgram(g_renderProgramHandle);	
+
+	glUniform1i(glGetUniformLocation(g_computeProgramHandle, "sourceTexture"), 0);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, g_textureHandle);
+	glBindTexture(GL_TEXTURE_2D, g_computeOutputHandle);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	glutSwapBuffers();
 }
@@ -254,13 +274,15 @@ int main(int argc, char** argv)
 	// Bind the VB for the draw surface
 	My_DEBUGDrawSurfaceVBCreation(g_renderProgramHandle);
 	// Load texture for draw surface
-	g_textureHandle = My_GenerateTexture();
+	g_computeOutputHandle = My_GenerateTexture();
 	// Load texture for box
-	g_boxTexture = My_LoadTexture("img_test.png");
+	glActiveTexture(GL_TEXTURE1);
+	g_cheryl = My_LoadTexture("green.png");
 
 	// Load main compute shader
 	vector<ShaderInfo> t_computeShaders;
-	t_computeShaders.push_back(ShaderInfo(GL_COMPUTE_SHADER, "ComputeShader.glsl"));
+//	t_computeShaders.push_back(ShaderInfo(GL_COMPUTE_SHADER, "ComputeShader.glsl"));
+	t_computeShaders.push_back(ShaderInfo(GL_COMPUTE_SHADER, "DebugComputeShader.glsl"));
 	g_computeProgramHandle = My_CreateShaderprogram(t_computeShaders);
 
 	// Create the camera

@@ -6,5 +6,8 @@ void main()
 {
 	float c = texture(sourceTexture, texCoord).x;
 	// color = vec4(0, 1.0, 0, 1.0);
-	color = texture(sourceTexture, texCoord);
+	if(texCoord.x > 0.5)
+		color = texture(sourceTexture, texCoord);
+	else
+		color = vec4(0,0,1,0);
 }

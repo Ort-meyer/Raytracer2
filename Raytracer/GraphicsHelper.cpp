@@ -52,16 +52,17 @@ GLuint My_GenerateTexture()
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, g_windowWidth, g_windowheight, 0, GL_RGBA, GL_FLOAT, NULL);
 	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 512, 512, 0, GL_RGBA, GL_FLOAT, NULL);
 
-	glBindImageTexture(0, t_textureHandle, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+	//glBindImageTexture(0, t_textureHandle, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
 	return t_textureHandle;
 }
 
 GLuint My_LoadTexture(const char* p_fileName)
 {
-	GLuint t_texture = SOIL_load_OGL_texture(p_fileName, SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT);
+	GLuint t_texture = SOIL_load_OGL_texture(p_fileName, SOIL_LOAD_RGBA, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT);
 	return t_texture;
 }
+
 
 GLuint My_CreateShaderprogram(vector<ShaderInfo> p_programShaders)
 {

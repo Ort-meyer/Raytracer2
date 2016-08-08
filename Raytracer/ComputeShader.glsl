@@ -11,7 +11,8 @@ uniform vec3 ray01;
 
 layout(binding=0,rgba8) uniform image2D destTex;
 layout (local_size_x = 16, local_size_y = 16) in;
-
+//Textures
+layout(binding=1,rgba8) uniform image2D boxTextureSampler;
 //Lights
 uniform vec3[50] lightPositions;
 uniform int numLights;
@@ -30,8 +31,7 @@ uniform vec3[3*40] trianglePositions; // 3 corners times maximum of 10 triangles
 uniform vec3[40] triangleColors;
 uniform int numTrianglePositions;
 
-//Textures
-uniform sampler2D boxTextureSampler;
+
 
 const int numTrianglesRendered = 1000;
 const int numBounces = 1;
@@ -63,6 +63,7 @@ struct Hitdata
 	vec3 normal;
 	vec3 position;
 	int hitIndex;
+	vec2 uv;
 };
 
 Ray RayDirection() // used to return vec3
@@ -184,11 +185,40 @@ Hitdata ComputeHit(Ray ray)
 		{
 			// MOVE THIS SHIT OUT AND DO AT THE END??
 			hitDistance = t;
-			vec3 normal = normalize(cross((p1-p0), (p2-p0)));
-			hitdata.normal = normal;
+			vec3 normal = cross((p1-p0), (p2-p0));
+			hitdata.normal = normalize(normal);
 			hitdata.hit = true;
 			hitdata.hitIndex  = -((i/9) + 1);
 			hitdata.position = ray.pos + ray.dir * t;
+
+			float denom = dot(normal, normal);
+
+			float u = 0;
+			float v = 0;
+
+			vec3 c;
+			// edge0. not needed?
+			vec3 edge0 = p1-p0;
+			vec3 vp0 = hitdata.position - p0;
+			c = cross(edge0, vp0);
+
+			// edge1
+			vec3 edge1 = p2-p1;
+			vec3 vp1 = hitdata.position-p1;
+			c = cross(edge1, vp1);
+			u = dot(normal, c);
+
+			// edge2
+			vec3 edge2 = p0 - p1;
+			vec3 vp2 = hitdata.position - p2;
+			c = cross(edge2, vp2);
+			v = dot(normal, c);
+
+			u /= denom;
+			v /= denom;
+			
+			hitdata.uv = vec2(u, v);
+
 		}
 	}
 
@@ -338,6 +368,9 @@ void main()
 				//endColor += lightValue * vec3(0,1,0);//triangleColors[(-1*hitdata.hitIndex)-1];
 				//endColor += 1 * vec3(textureCorners[i*3], textureCorners[i*3+1], 0);
 				endColor = 1 * vec3(textureCorners[4], textureCorners[5], 0);
+				//endColor = 1 * texture(boxTextureSampler, hitdata.uv).xyz;
+				//endColor = texture(boxTextureSampler, vec2(0,0)).xyz;
+				//endColor = vec3(hitdata.uv, 0);
 			}
 
 			// Change ray for bounce
@@ -355,5 +388,8 @@ void main()
 	//endColor = bthCorners[1];
 
 
-	imageStore(destTex, storePos, vec4(endColor.xyz,0));
+	//imageStore(destTex, storePos, vec4(endColor.xyz,0));
+
+	vec4 finalColor = imageLoad(boxTextureSampler, ivec2(50,50));
+	imageStore(destTex, storePos, finalColor);
 }

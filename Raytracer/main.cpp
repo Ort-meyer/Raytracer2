@@ -59,15 +59,11 @@ void RenderScene()
 
 	// Start with compute shader
 	glUseProgram(g_computeProgramHandle);
-
-	//glUniform1i(glGetUniformLocation(g_computeProgramHandle, "outTex"), 0); // boxTextureSampler
-
+	
 	glActiveTexture(GL_TEXTURE0);
 	glBindImageTexture(0, g_computeOutputHandle, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 	glActiveTexture(GL_TEXTURE1);
 	glBindImageTexture(1, g_cheryl, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
-	//glUniform1i(glGetUniformLocation(g_computeProgramHandle, "inTex"), 1); // boxTextureSampler
-
 
 
 
@@ -150,7 +146,7 @@ void RenderScene()
 	// Render the results
 	glUseProgram(g_renderProgramHandle);	
 
-	glUniform1i(glGetUniformLocation(g_computeProgramHandle, "sourceTexture"), 0);
+	glUniform1i(g_computeProgramHandle, 0);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, g_computeOutputHandle);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -277,8 +273,7 @@ int main(int argc, char** argv)
 	g_computeOutputHandle = My_GenerateTexture();
 	// Load texture for box
 	glActiveTexture(GL_TEXTURE1);
-	g_cheryl = My_LoadTexture("green.png");
-
+	g_cheryl = My_LoadTexture("img_cheryl.jpg");
 	// Load main compute shader
 	vector<ShaderInfo> t_computeShaders;
 //	t_computeShaders.push_back(ShaderInfo(GL_COMPUTE_SHADER, "ComputeShader.glsl"));

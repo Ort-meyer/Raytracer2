@@ -9,10 +9,13 @@ uniform vec3 ray10;
 uniform vec3 ray11;
 uniform vec3 ray01;
 
-layout(binding=0,rgba8) uniform image2D destTex;
-layout (local_size_x = 16, local_size_y = 16) in;
 //Textures
-layout(binding=1,rgba8) uniform image2D boxTextureSampler;
+layout(binding=0,rgba8) uniform image2D destTex;
+layout(binding=1) uniform sampler2D boxTextureSampler;
+
+layout (local_size_x = 16, local_size_y = 16) in;
+
+
 //Lights
 uniform vec3[50] lightPositions;
 uniform int numLights;
@@ -343,9 +346,9 @@ void main()
 	Ray ray = RayDirection();
 	ray.dir = normalize(ray.dir);
 	Hitdata derp;
-
-
-
+	
+	
+	
 	// Bounce new shit
 	vec3 endColor = vec3(0,0,0);
 	for(int i = 0; i < numBounces + 1; i++)
@@ -357,7 +360,7 @@ void main()
 			lightValue = 0.5;
 			lightValue = CalculatePointLightLightingOnly(hitdata, ray);
 			lightValue *= CalculatePointLightShadowOnly(hitdata, ray);
-
+	
 			endColor += vec3(1,0,0) * lightValue;
 			if(hitdata.hitIndex > 0)
 			{
@@ -367,16 +370,16 @@ void main()
 			{
 				//endColor += lightValue * vec3(0,1,0);//triangleColors[(-1*hitdata.hitIndex)-1];
 				//endColor += 1 * vec3(textureCorners[i*3], textureCorners[i*3+1], 0);
-				endColor = 1 * vec3(textureCorners[4], textureCorners[5], 0);
-				//endColor = 1 * texture(boxTextureSampler, hitdata.uv).xyz;
+				//endColor = 1 * vec3(textureCorners[4], textureCorners[5], 0);
+				endColor = 1 * texture(boxTextureSampler, hitdata.uv).xyz;
 				//endColor = texture(boxTextureSampler, vec2(0,0)).xyz;
 				//endColor = vec3(hitdata.uv, 0);
 			}
-
+	
 			// Change ray for bounce
 			ray.pos = hitdata.position;
 			ray.dir = normalize(reflect(normalize(ray.dir), normalize(hitdata.normal)));
-
+	
 		}
 		else
 			break;
@@ -384,12 +387,6 @@ void main()
 
 	ivec2 storePos = ivec2(gl_GlobalInvocationID.xy);
 	storePos.y = 768 - storePos.y;
-	
-	//endColor = bthCorners[1];
 
-
-	//imageStore(destTex, storePos, vec4(endColor.xyz,0));
-
-	vec4 finalColor = imageLoad(boxTextureSampler, ivec2(50,50));
-	imageStore(destTex, storePos, finalColor);
+	imageStore(destTex, storePos, vec4(endColor.xyz,0));
 }

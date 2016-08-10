@@ -113,8 +113,17 @@ vector<Triangle> ModelLoader::LoadModel(const char * p_fileName)
 		t_texCorners.push_back(t_texCoordsCorners[i]);
 		t_texCorners.push_back(t_texCoordsCorners[i+1]);
 		t_texCorners.push_back(t_texCoordsCorners[i+2]);
+		t_texCorners.push_back(vec2(t_corners[i].x, t_corners[i].y) * 2.0f);
+		t_texCorners.push_back(vec2(t_corners[i+1].x, t_corners[i+1].y) * 2.0f);
+		t_texCorners.push_back(vec2(t_corners[i+2].x, t_corners[i+2].y) * 2.0f);
+
+		//t_texCorners.push_back(vec2(0,0));
+		//t_texCorners.push_back(vec2(1, 0));
+		//t_texCorners.push_back(vec2(1, 1));
+
 
         t_triangles.push_back(Triangle(t_cornersPos, t_texCorners,vec3(1,1,0)));
+
     }
 	//t_triangles.clear();
 	//

@@ -190,8 +190,8 @@ void CreateObjSSBO()
 		}
 	}
 
-	block_index = 0;
-	block_index = glGetProgramResourceIndex(g_computeProgramHandle, GL_SHADER_STORAGE_BLOCK, "texture_data");
+	block_index = 3;
+	//block_index = glGetProgramResourceIndex(g_computeProgramHandle, GL_SHADER_STORAGE_BLOCK, "texture_data");
 	ssbo_binding_point_index = 3;
 	glShaderStorageBlockBinding(g_computeProgramHandle, block_index, ssbo_binding_point_index);
 

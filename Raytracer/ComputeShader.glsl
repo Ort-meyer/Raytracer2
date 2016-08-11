@@ -308,13 +308,13 @@ Hitdata ComputeHit(Ray ray)
 
 float CalculateLightStrength(vec3 vertexToEye, vec3 lightDirection, vec3 hitNormal, int thisIndex)
 {
-	
+	// This values will be used by spheres
 	float diffuseIntensity = 0.6;
 	float specularPower = 4;
 	float matSpecularIntensity = 0.4;
 	float ambientIntensity = 0.1;
 
-	if(true)//thisIndex < 0) // It's a triangle
+	if(thisIndex < 0) // It's a triangle. Change values to material of triangle
 	{
 		int matIndex;
 		matIndex = 0;
@@ -322,18 +322,6 @@ float CalculateLightStrength(vec3 vertexToEye, vec3 lightDirection, vec3 hitNorm
 		matSpecularIntensity = material[matIndex+1];
 		ambientIntensity = material[matIndex+2];
 		specularPower = material[matIndex+4];
-
-		//diffuseIntensity = 0;
-		//matSpecularIntensity = 0;
-		//ambientIntensity = 0;
-		//specularPower = 0;
-	}
-	else
-	{
-		diffuseIntensity = 0;
-		matSpecularIntensity = 0;
-		ambientIntensity = 0;
-		specularPower = 0;
 	}
 
 	// Simple diffuse calculation
@@ -343,7 +331,7 @@ float CalculateLightStrength(vec3 vertexToEye, vec3 lightDirection, vec3 hitNorm
 	specularFactor = dot(vertexToEye, lightReflect);
 	specularFactor = matSpecularIntensity * pow(specularFactor, specularPower);
 
-	return diffuseFactor + clamp(specularFactor, ambientIntensity, 1.0f);
+	return diffuseFactor + clamp(specularFactor, 0, 1.0f) + ambientIntensity; 
 }
 
 float CalculatePointLightLightingOnly(Hitdata hitdata, Ray ray, int thisIndex)

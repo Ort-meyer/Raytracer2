@@ -83,9 +83,4 @@
     <None Include="simpleFragmentShader.glsl" />
     <None Include="simpleVertexShader.glsl" />
   </ItemGroup>
-  <ItemGroup>
-    <Object Include="cube.obj">
-      <Filter>Resource Files</Filter>
-    </Object>
-  </ItemGroup>
 </Project>

@@ -226,7 +226,7 @@ void CreateObjSSBO()
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, g_materialSSBO);
    // Create some materials
    vector<Material> t_materials;
-   t_materials.push_back(Material(0.6, 0.4, 0.1, 0.3, 4));
+   t_materials.push_back(Material(0, 0, 0.1, 0.3, 4));
    t_materials.push_back(Material(0, 0, 0, 0, 0));
 
    block_index = 4;

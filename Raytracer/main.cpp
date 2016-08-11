@@ -32,6 +32,9 @@ GLuint g_cheryl;
 // ssbo of bth logo
 GLuint g_bthSSBO = 0;
 GLuint g_textureSSBO = 0;
+GLuint g_materialSSBO = 0;
+GLuint g_sphereMatIndicesSSBO = 0;
+GLuint g_triangleMatIndicesSSBO = 0;
 
 /// Shader programs
 // Used to render the final picture
@@ -42,6 +45,25 @@ GLuint g_computeProgramHandle;
 /// Other stuff
 Camera* g_camera;
 World* g_world;
+
+struct Material 
+{
+   Material(float p_diffuse, float p_specular, float p_ambient, float p_reflection, float p_specularPower) 
+   {
+      diffuseFactor = p_diffuse;
+      specularFactor = p_specular;
+      ambientFactor = p_ambient;
+      reflectionFactor = p_reflection;
+
+      specularPower = p_specularPower;
+   }
+   float diffuseFactor = 0;
+   float specularFactor = 0;
+   float ambientFactor = 0;
+   float reflectionFactor = 0;
+   
+   float specularPower = 0;
+};
 
 using namespace std;
 
@@ -198,6 +220,60 @@ void CreateObjSSBO()
 	// Bind data to buffer
 	glBufferData(GL_SHADER_STORAGE_BUFFER, t_textureCoordinates.size() * sizeof(vec2), &t_textureCoordinates[0], GL_DYNAMIC_COPY);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, g_textureSSBO);
+
+   /// Now for materials
+   glGenBuffers(1, &g_materialSSBO);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, g_materialSSBO);
+   // Create some materials
+   vector<Material> t_materials;
+   t_materials.push_back(Material(0.6, 0.4, 0.1, 0.3, 4));
+   t_materials.push_back(Material(0, 0, 0, 0, 0));
+
+   block_index = 4;
+   ssbo_binding_point_index = 4;
+
+   float data[50];
+   data[0] = 0;
+   data[1] = 0;
+   data[2] = 0;
+   data[3] = 0;
+   data[4] = 2;
+   
+   glShaderStorageBlockBinding(g_computeProgramHandle, block_index, ssbo_binding_point_index);
+
+	// Bind data to buffer
+	glBufferData(GL_SHADER_STORAGE_BUFFER, t_materials.size() * sizeof(Material), &t_materials[0], GL_DYNAMIC_COPY);
+   //glBufferData(GL_SHADER_STORAGE_BUFFER, 20, &data, GL_DYNAMIC_COPY);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, g_materialSSBO);
+
+
+
+
+
+
+    /// And there indices for triangles
+   glGenBuffers(1, &g_sphereMatIndicesSSBO);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, g_sphereMatIndicesSSBO);
+
+   // Create some indices
+   vector<int> t_sphereIndices;
+   for (size_t i = 0; i < t_bthTriangles.size(); i++) 
+   {
+      t_sphereIndices.push_back(t_bthTriangles[i].m_materialIndex);
+   }
+
+
+
+
+   block_index = 5;
+   ssbo_binding_point_index = 5;
+   
+   glShaderStorageBlockBinding(g_computeProgramHandle, block_index, ssbo_binding_point_index);
+
+	// Bind data to buffer
+	glBufferData(GL_SHADER_STORAGE_BUFFER, t_sphereIndices.size() * sizeof(int), &t_sphereIndices[0], GL_DYNAMIC_COPY);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, g_sphereMatIndicesSSBO);
+
 }
 
 // Methods to handle keyboard input. Bound to glut callback

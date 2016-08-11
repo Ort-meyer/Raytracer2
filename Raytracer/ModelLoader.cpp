@@ -26,6 +26,7 @@ vector<Triangle> ModelLoader::LoadModel(const char * p_fileName)
 	vector<vec2> t_texCoordsCorners;
 	vector<vec3> t_corners;
 	vector<vec2> t_texCoords;
+   vector<int> t_materialIndices;
 	t_positions.resize(0);
 	t_texCoordsCorners.resize(0);
 	t_corners.resize(0);
@@ -78,22 +79,23 @@ vector<Triangle> ModelLoader::LoadModel(const char * p_fileName)
         else if (strcmp(t_lineHeader, "f") == 0)
         {
 			unsigned int vertexIndex[3], texCoordIndex[3], normalIndex[3];
+         int materialIndex = 0;
 			//int matches = fscanf_s(t_file, "%d%d/%d %d/%d/%d %d/%d/%d\n", maybe should be %d/%d/%d %d/%d/%d %d/%d/%d\n",
 			//	&vertexIndex[0], &texCoordIndex[0], &normalIndex[0],
 			//	&vertexIndex[1], &texCoordIndex[1], &normalIndex[1],
 			//	&vertexIndex[2], &texCoordIndex[2], &normalIndex[2]);
-			int read = fscanf_s(t_file, "%d  %d  %d - %d %d %d",
+			int read = fscanf_s(t_file, "%d  %d  %d - %d %d %d - %d",
 				&vertexIndex[0], &vertexIndex[1], &vertexIndex[2],
-				&texCoordIndex[0], &texCoordIndex[1], &texCoordIndex[2]);
+				&texCoordIndex[0], &texCoordIndex[1], &texCoordIndex[2], &materialIndex);
 			for (size_t i = 0; i < 3; i++)
 			{
 				t_corners.push_back(t_positions[vertexIndex[i]-1]);
 				t_texCoordsCorners.push_back(t_texCoords[texCoordIndex[i] - 1]);
 			}
+         t_materialIndices.push_back(materialIndex);
         }
         else if (strcmp(t_lineHeader, "usemtl") == 0)
         {
-            // Empty
         }
 
 
@@ -122,7 +124,7 @@ vector<Triangle> ModelLoader::LoadModel(const char * p_fileName)
 		//t_texCorners.push_back(vec2(1, 1));
 
 
-        t_triangles.push_back(Triangle(t_cornersPos, t_texCorners,vec3(1,1,0)));
+        t_triangles.push_back(Triangle(t_cornersPos, t_texCorners,vec3(1,1,0), t_materialIndices[i/3]));
 
     }
 	//t_triangles.clear();

@@ -37,7 +37,7 @@ uniform int numTrianglePositions;
 
 
 const int numTrianglesRendered = 1000;
-const int numBounces = 1;
+const int numBounces = 0;
 
 //BTH logo buffer
 layout (std430, binding = 2) buffer shader_data
@@ -48,6 +48,16 @@ layout (std430, binding = 2) buffer shader_data
 layout (std430, binding = 3) buffer texture_data
 {
 	float textureCorners[500*2];
+};
+
+layout (std430, binding = 4) buffer material_data
+{
+	float material[200]; // Silly in a way...
+};
+
+layout (std430, binding = 5) buffer triangle_indices_data
+{
+	int triangleMaterialIndices[500];
 };
 
 // Hardcoded up-vector. used to figure out specific ups
@@ -152,71 +162,71 @@ float RayPwnTriangle(Ray ray, vec3 p0, vec3 p1, vec3 p2)
 }
 
 
-Hitdata HitVsTriangle2(Ray ray, Hitdata hitdata, vec3 v0, vec3 v1, vec3 v2, int thisIndex, float hitDistance)
-{
-	vec3 v0v1 = v1-v0;
-	vec3 v0v2 = v2-v0;
-
-	vec3 n = cross(v0v1, v0v2);
-	float denom = dot(n,n); // strange...
-
-	float nDotDir = dot(n, ray.dir);
-	if(abs(nDotDir) < 0)
-	{
-		return hitdata;
-	}
-
-	float d = dot(n, v0);
-
-	float t = (dot(n, ray.pos) + d) / nDotDir;
-
-	if(t < 0)// || t > hitDistance )
-	{
-		return hitdata;
-	}
-
-	vec3 p = ray.pos + t * ray.dir;
-
-	vec3 c;
-
-	// edge0
-	vec3 edge0 = v1 - v0;
-	vec3 vp0 = p - v0;
-	c = cross(edge0, vp0);
-
-	if(dot(n, c) < 0)
-		return hitdata;
-
-	// edge1
-	vec3 edge1 = v2 - v1;
-	vec3 vp1 = p - v1;
-	c = cross(edge1, vp1);
-	float u = 0;
-	if((u = dot(n, c)) < 0)
-	{
-		return hitdata;
-	}
-
-	// edge2
-	vec3 edge2 = v0 - v2;
-	vec3 vp2 = p - v2;
-	c = cross(edge2, vp2);
-	float v = 0;
-	if((v = dot(n, c)) < 0)
-	{
-		return hitdata;
-	}
-
-	u /= denom;
-	v /= denom;
-
-	hitdata.position = p;
-	hitdata.normal = normalize(n);
-	hitdata.hitIndex = -1 *(1+thisIndex);
-	hitdata.hit = true;
-	hitdata.uv = vec2(u, v);
-	return hitdata;
-}
+//Hitdata HitVsTriangle2(Ray ray, Hitdata hitdata, vec3 v0, vec3 v1, vec3 v2, int thisIndex, float hitDistance)
+//{
+//	vec3 v0v1 = v1-v0;
+//	vec3 v0v2 = v2-v0;
+//
+//	vec3 n = cross(v0v1, v0v2);
+//	float denom = dot(n,n); // strange...
+//
+//	float nDotDir = dot(n, ray.dir);
+//	if(abs(nDotDir) < 0)
+//	{
+//		return hitdata;
+//	}
+//
+//	float d = dot(n, v0);
+//
+//	float t = (dot(n, ray.pos) + d) / nDotDir;
+//
+//	if(t < 0)// || t > hitDistance )
+//	{
+//		return hitdata;
+//	}
+//
+//	vec3 p = ray.pos + t * ray.dir;
+//
+//	vec3 c;
+//
+//	// edge0
+//	vec3 edge0 = v1 - v0;
+//	vec3 vp0 = p - v0;
+//	c = cross(edge0, vp0);
+//
+//	if(dot(n, c) < 0)
+//		return hitdata;
+//
+//	// edge1
+//	vec3 edge1 = v2 - v1;
+//	vec3 vp1 = p - v1;
+//	c = cross(edge1, vp1);
+//	float u = 0;
+//	if((u = dot(n, c)) < 0)
+//	{
+//		return hitdata;
+//	}
+//
+//	// edge2
+//	vec3 edge2 = v0 - v2;
+//	vec3 vp2 = p - v2;
+//	c = cross(edge2, vp2);
+//	float v = 0;
+//	if((v = dot(n, c)) < 0)
+//	{
+//		return hitdata;
+//	}
+//
+//	u /= denom;
+//	v /= denom;
+//
+//	hitdata.position = p;
+//	hitdata.normal = normalize(n);
+//	hitdata.hitIndex = -1 *(1+thisIndex);
+//	hitdata.hit = true;
+//	hitdata.uv = vec2(u, v);
+//	return hitdata;
+//}
 
 
 // Big method that iterates through each geometry and returns hit data for the object we hit
@@ -249,9 +259,6 @@ Hitdata ComputeHit(Ray ray)
 		vec3 p0 = vec3(bthCorners[i], bthCorners[i+1], bthCorners[i+2]);
 		vec3 p1 = vec3(bthCorners[i+3], bthCorners[i+4], bthCorners[i+5]);
 		vec3 p2 = vec3(bthCorners[i+6], bthCorners[i+7], bthCorners[i+8]);
-
-		// Alternative which doens't seem to work
-		//hitdata = HitVsTriangle2(ray, hitdata, p0, p1, p2, i / 9, hitDistance);
 		
 		float t = RayPwnTriangle(ray, p0,p1,p2);
 		if(t > 0 && t < hitDistance)
@@ -284,7 +291,6 @@ Hitdata ComputeHit(Ray ray)
 			w = (d00 * d21 - d01 * d20) / denom;
 			u = 1.0f - v - w;
 
-
 			vec2 uvs[3];
 			int index = -1 * hitdata.hitIndex;
 			index -=1;
@@ -292,121 +298,55 @@ Hitdata ComputeHit(Ray ray)
 			uvs[0] = vec2(textureCorners[index], textureCorners[index+1]);
 			uvs[1] = vec2(textureCorners[index+2], textureCorners[index+3]);
 			uvs[2] = vec2(textureCorners[index+4], textureCorners[index+5]);
-			//if((i/3)/2 == 0)
-			//{
-			//uvs[0] = vec2(0,0);
-			//uvs[1] = vec2(1,0);
-			//uvs[2] = vec2(1,1);
-			//}
-			//else
-			//{
-			//	uvs[0] = vec2(0,0);
-			//	uvs[1] = vec2(1,0);
-			//	uvs[2] = vec2(1,1);
-			//}
 
 			hitdata.uv = u * uvs[0] + v * uvs[1] + w * uvs[2];
-
-			
-
-
-			//// Our own UV calculation
-			//vec3 p = hitdata.position;
-			//vec2 uvs[3];
-			//uvs[0] = vec2(textureCorners[i/3], textureCorners[i/3+1]);
-			//uvs[1] = vec2(textureCorners[(i/3)+2], textureCorners[i/3+3]);
-			//uvs[2] = vec2(textureCorners[(i/3)+4], textureCorners[i/3+5]);
-			//
-			//
-			//float x = length(p0 - p);
-			//float x1 = length(p1-p0);
-			//float x2 = length(p2-p0);
-			//float xm = max(x1,x2);
-			//float xn = x / xm;
-			//
-			//float y = length(p1 - p);
-			//float y1 = length(p0-p1);
-			//float y2 = length(p2-p1);
-			//float ym = max(y1,y2);
-			//float yn = y / xm;
-			//
-			//float z = length(p2 - p);
-			//float z1 = length(p0-p2);
-			//float z2 = length(p1-p2);
-			//float zm = max(z1,z2);
-			//float zn = z / zm;
-			//
-			////hitdata.uv = (1-xn) * uvs[0] + (1-yn) * uvs[1] + (1-zn) * uvs[2];
-			//hitdata.uv = (1-xn) * vec2(0,0) + (1-yn) * vec2(1,0) + (1-zn) * vec2(1,1);
-
-
-
-
-		
-			//// Barycentric texture stuff
-			//float denom = dot(normal, normal);
-			//
-			//float u = 0;
-			//float v = 0;
-			//
-			//vec3 c;
-			//// edge0. not needed?
-			//vec3 edge0 = p1-p0;
-			//vec3 vp0 = hitdata.position - p0;
-			//c = cross(edge0, vp0);
-			//
-			//// edge1
-			//vec3 edge1 = p2-p1;
-			//vec3 vp1 = hitdata.position-p1;
-			//c = cross(edge1, vp1);
-			//u = dot(normal, c);
-			//
-			//// edge2
-			//vec3 edge2 = p0 - p2;
-			//vec3 vp2 = hitdata.position - p2;
-			//c = cross(edge2, vp2);
-			//v = dot(normal, c);
-			//
-			//u /= denom;
-			//v /= denom;
-			//
-			//
-			//
-			//
-			//hitdata.uv = vec2(u, v);
-		
 		}
 	}
 
 	return hitdata;
 }
 
-float CalculateLightStrength(vec3 vertexToEye, vec3 lightDirection, vec3 hitNormal)
+float CalculateLightStrength(vec3 vertexToEye, vec3 lightDirection, vec3 hitNormal, int thisIndex)
 {
+	
 	float diffuseIntensity = 0.6;
 	float specularPower = 4;
 	float matSpecularIntensity = 0.4;
-	
+	float ambientIntensity = 0.1;
+
+	if(true)//thisIndex < 0) // It's a triangle
+	{
+		int matIndex;
+		matIndex = 0;
+		diffuseIntensity = material[matIndex];
+		matSpecularIntensity = material[matIndex+1];
+		ambientIntensity = material[matIndex+2];
+		specularPower = material[matIndex+4];
+
+		//diffuseIntensity = 0;
+		//matSpecularIntensity = 0;
+		//ambientIntensity = 0;
+		//specularPower = 0;
+	}
+	else
+	{
+		diffuseIntensity = 0;
+		matSpecularIntensity = 0;
+		ambientIntensity = 0;
+		specularPower = 0;
+	}
+
 	// Simple diffuse calculation
 	float diffuseFactor = dot(hitNormal, -lightDirection) * diffuseIntensity;
-	// 
 	float specularFactor = 0.0f;
-	//if(diffuseFactor > 0)
-	{
-		vec3 lightReflect = normalize(reflect(lightDirection, hitNormal));
-		specularFactor = dot(vertexToEye, lightReflect);
-		//if(specularFactor > 0)
-		{
-			specularFactor = matSpecularIntensity * pow(specularFactor, specularPower);
-		}
-	}
-	//return clamp(specularFactor + diffuseFactor, 0.1, 1.0f);
-	return diffuseFactor + clamp(specularFactor, 0.1, 1.0f);
-	//return diffuseFactor + specularFactor + 0.1;
+	vec3 lightReflect = normalize(reflect(lightDirection, hitNormal));
+	specularFactor = dot(vertexToEye, lightReflect);
+	specularFactor = matSpecularIntensity * pow(specularFactor, specularPower);
 
+	return diffuseFactor + clamp(specularFactor, ambientIntensity, 1.0f);
 }
 
-float CalculatePointLightLightingOnly(Hitdata hitdata, Ray ray)
+float CalculatePointLightLightingOnly(Hitdata hitdata, Ray ray, int thisIndex)
 {
 	float lightFactorColor = 0.1; // some ambient
 	for(int i = 0; i < numLights; ++i)
@@ -415,16 +355,9 @@ float CalculatePointLightLightingOnly(Hitdata hitdata, Ray ray)
 		float distance = length(lightDirection);
 		lightDirection = normalize(lightDirection);
 		
-		float lightValue = CalculateLightStrength(cameraPosition - hitdata.position, lightDirection, hitdata.normal);
+		float lightValue = CalculateLightStrength(cameraPosition - hitdata.position, lightDirection, hitdata.normal, thisIndex);
 		
-		//float constant = 0.1;
-		//float linear = 0.1;
-		//float exponant = 0.1;
-		
-		//float attenuation = constant + linear * distance + exponant * distance * distance;
-		//float attenuation = 0.1 + 0.1 * distance + 0.1 * distance * distance;
-		
-		//lightFactorColor += lightValue / attentuation;
+
 		lightFactorColor += lightValue / (0.1 + 0.1 * distance + 0.1 * distance * distance);
 		
 		// vector between light and where the ray hit an object
@@ -432,19 +365,17 @@ float CalculatePointLightLightingOnly(Hitdata hitdata, Ray ray)
 		// "Angle" between hitLightVector and normal of hit
 		float normalLightDot = dot(hitdata.normal, hitLightVector);
 		
-		//float inverseLightStrength = 0.145;
 		float currentLightColorFactor = normalLightDot;
-		//currentLightColorFactor *= 1 - length(hitLightVector) * inverseLightStrength; // This is for light cutoff 
 		currentLightColorFactor *= 1 - length(hitLightVector) * 0.145; // This is for light cutoff 
 		lightFactorColor += clamp(currentLightColorFactor, 0, 1);
 
 	}
 	for(int i = 0; i<numDiffuseLights; i++)
 	{
-		lightFactorColor += CalculateLightStrength(normalize(cameraPosition - hitdata.position), diffuseLightingDirections[i], hitdata.normal);
+		lightFactorColor += CalculateLightStrength(normalize(cameraPosition - hitdata.position), diffuseLightingDirections[i], hitdata.normal, thisIndex);
 	}
 	// Ensure there's always ambience
-	lightFactorColor = clamp(lightFactorColor, 0.1f, 1.0f);
+	lightFactorColor = clamp(lightFactorColor, 0, 1.0f);
 	return lightFactorColor;
 }
 
@@ -511,30 +442,35 @@ void main()
 		if(hitdata.hit)
 		{
 			lightValue = 0.5;
-			lightValue = CalculatePointLightLightingOnly(hitdata, ray);
+			lightValue = CalculatePointLightLightingOnly(hitdata, ray, hitdata.hitIndex);
 			lightValue *= CalculatePointLightShadowOnly(hitdata, ray);
 	
-			endColor += vec3(1,0,0) * lightValue;
+			//endColor += vec3(1,0,0) * lightValue;
+			float reflectionFactor = 1;
 			if(hitdata.hitIndex > 0)
 			{
-				endColor += lightValue * sphereColors[hitdata.hitIndex-1];
+				if(i == 0)
+					reflectionFactor = 1;
+				else
+					reflectionFactor = 0.5;
+				vec3 addColor = lightValue * sphereColors[hitdata.hitIndex-1];
+				endColor = addColor * reflectionFactor + endColor * (1-reflectionFactor);
+				//endColor += lightValue * sphereColors[hitdata.hitIndex-1];
 			}
 			else
 			{
-				//endColor += lightValue * vec3(0,1,0);//triangleColors[(-1*hitdata.hitIndex)-1];
-				//endColor += 1 * vec3(textureCorners[i*3], textureCorners[i*3+1], 0);
-				//endColor = 1 * vec3(textureCorners[4], textureCorners[5], 0);
-				
-				endColor = lightValue * texture(boxTextureSampler, hitdata.uv).xyz;
-				//endColor = vec3(hitdata.uv, 0);
-
-				//endColor = 1 * texture(boxTextureSampler, hitdata.uv).xyz; // Correct one
+				if(i == 0)
+					reflectionFactor = 1;
+				else
+					reflectionFactor = 0.5;
+				vec3 addColor = lightValue * texture(boxTextureSampler, hitdata.uv).xyz;
+				endColor = addColor * reflectionFactor + endColor * (1-reflectionFactor);
+				//endColor += reflectionFactor * lightValue * texture(boxTextureSampler, hitdata.uv).xyz;
 			}
 	
 			// Change ray for bounce
 			ray.pos = hitdata.position;
 			ray.dir = normalize(reflect(normalize(ray.dir), normalize(hitdata.normal)));
-	
 		}
 		else
 			break;

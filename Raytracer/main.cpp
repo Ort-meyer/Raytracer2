@@ -226,24 +226,17 @@ void CreateObjSSBO()
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, g_materialSSBO);
    // Create some materials
    vector<Material> t_materials;
-   t_materials.push_back(Material(0, 0, 0.1, 0.3, 4));
-   t_materials.push_back(Material(0, 0, 0, 0, 0));
+   t_materials.push_back(Material(1, 0, 0.1, 0.5, 4));
+   t_materials.push_back(Material(1, 0, 0.1, 0.1, 4));
 
    block_index = 4;
    ssbo_binding_point_index = 4;
 
-   float data[50];
-   data[0] = 0;
-   data[1] = 0;
-   data[2] = 0;
-   data[3] = 0;
-   data[4] = 2;
    
    glShaderStorageBlockBinding(g_computeProgramHandle, block_index, ssbo_binding_point_index);
 
 	// Bind data to buffer
 	glBufferData(GL_SHADER_STORAGE_BUFFER, t_materials.size() * sizeof(Material), &t_materials[0], GL_DYNAMIC_COPY);
-   //glBufferData(GL_SHADER_STORAGE_BUFFER, 20, &data, GL_DYNAMIC_COPY);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, g_materialSSBO);
 
 

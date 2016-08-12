@@ -37,7 +37,7 @@ uniform int numTrianglePositions;
 
 
 const int numTrianglesRendered = 1000;
-const int numBounces = 0;
+const int numBounces = 1;
 
 //BTH logo buffer
 layout (std430, binding = 2) buffer shader_data
@@ -316,8 +316,7 @@ float CalculateLightStrength(vec3 vertexToEye, vec3 lightDirection, vec3 hitNorm
 
 	if(thisIndex < 0) // It's a triangle. Change values to material of triangle
 	{
-		int matIndex;
-		matIndex = 0;
+		int matIndex = triangleMaterialIndices[-1*(thisIndex + 1)];
 		diffuseIntensity = material[matIndex];
 		matSpecularIntensity = material[matIndex+1];
 		ambientIntensity = material[matIndex+2];
@@ -419,13 +418,16 @@ void main()
 	ray.dir = normalize(ray.dir);
 	Hitdata derp;
 	
-	
-	
 	// Bounce new shit
 	vec3 endColor = vec3(0,0,0);
-	for(int i = 0; i < numBounces + 1; i++)
+	float reflectionFactor = 0;
+
+	float x = 0.5;
+
+	float lightValue = 0;
+
+	for(int i = 0; i < numBounces+1; i++)
 	{
-		float lightValue = 0;
 		Hitdata hitdata = ComputeHit(ray);
 		if(hitdata.hit)
 		{
@@ -433,27 +435,25 @@ void main()
 			lightValue = CalculatePointLightLightingOnly(hitdata, ray, hitdata.hitIndex);
 			lightValue *= CalculatePointLightShadowOnly(hitdata, ray);
 	
-			//endColor += vec3(1,0,0) * lightValue;
-			float reflectionFactor = 1;
-			if(hitdata.hitIndex > 0)
+			if(hitdata.hitIndex > 0) // Sphere
 			{
 				if(i == 0)
-					reflectionFactor = 1;
-				else
 					reflectionFactor = 0.5;
 				vec3 addColor = lightValue * sphereColors[hitdata.hitIndex-1];
-				endColor = addColor * reflectionFactor + endColor * (1-reflectionFactor);
-				//endColor += lightValue * sphereColors[hitdata.hitIndex-1];
+				endColor = addColor * reflectionFactor + (1-reflectionFactor) * endColor;
+				reflectionFactor = 0.5;
 			}
-			else
+			else // Triangle
 			{
 				if(i == 0)
-					reflectionFactor = 1;
-				else
-					reflectionFactor = 0.5;
+				{
+					int materialArrayReflectionSlot = (triangleMaterialIndices[-1*(hitdata.hitIndex+1)]-1) * 5 + 3;
+					reflectionFactor = material[materialArrayReflectionSlot];
+				}
 				vec3 addColor = lightValue * texture(boxTextureSampler, hitdata.uv).xyz;
 				endColor = addColor * reflectionFactor + endColor * (1-reflectionFactor);
-				//endColor += reflectionFactor * lightValue * texture(boxTextureSampler, hitdata.uv).xyz;
+				int materialArrayReflectionSlot = (triangleMaterialIndices[-1*(hitdata.hitIndex+1)]-1) * 5 + 3;
+				reflectionFactor = material[materialArrayReflectionSlot];
 			}
 	
 			// Change ray for bounce
@@ -463,6 +463,7 @@ void main()
 		else
 			break;
 	}
+	
 
 	ivec2 storePos = ivec2(gl_GlobalInvocationID.xy);
 	storePos.y = 768 - storePos.y;

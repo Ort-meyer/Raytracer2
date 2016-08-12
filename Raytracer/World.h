@@ -24,6 +24,10 @@ public:
 	void GetTriangleInfo(vector<vec3>& o_triangleCorners, vector<vec3>& o_triangleColors);
 	void GetDiffuseLighting(vector<vec3>& o_diffuseLightingDirections);
 
+	void TenPointLightsTenSpheres(vector<Sphere*>& o_spherePositions, vector<PointLight*>& o_pointLightPositions);
+
+	void OnePointLightsTenSpheres(vector<Sphere*>& o_spherePositions, vector<PointLight*>& o_pointLightPositions);
+
 private:
 	void SetupWorld();
 

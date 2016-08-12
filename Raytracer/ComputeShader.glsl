@@ -37,7 +37,7 @@ uniform int numTrianglePositions;
 
 
 const int numTrianglesRendered = 1000;
-const int numBounces = 1;
+const int numBounces = 2;
 
 //BTH logo buffer
 layout (std430, binding = 2) buffer shader_data

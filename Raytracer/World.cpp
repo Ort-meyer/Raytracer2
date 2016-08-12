@@ -63,7 +63,89 @@ void World::GetDiffuseLighting(vector<vec3>& o_diffuseLightingDirections)
 		o_diffuseLightingDirections.push_back(normalize(m_diffuseLights[i]->m_diffuseLightDirection));
 	}
 }
+void World::TenPointLightsTenSpheres(vector<Sphere*>& o_spherePositions, vector<PointLight*>& o_pointLightPositions)
+{
+	vec3 red = vec3(1, 0, 0);
+	vec3 green = vec3(0, 1, 0);
+	vec3 blue = vec3(0, 0, 1);
+	vec3 yellow = vec3(1, 1, 0);
+	vec3 pink = vec3(1, 0, 1);
+	vec3 teal = vec3(0, 1, 1);
+	vector<vec3>colors;
+	colors.push_back(pink);
+	colors.push_back(red);
+	colors.push_back(green);
+	colors.push_back(yellow);
+	colors.push_back(blue);
+	colors.push_back(vec3(0.3f, 1, 1));
+	colors.push_back(vec3(0.5f, 0.5f, 0));
+	colors.push_back(vec3(0.3, 1, 0));
+	colors.push_back(vec3(0, 0.5f, 1));
+	colors.push_back(vec3(0, 0.5f, 0.3f));
+	vector<vec3> t_waypoints;
+	t_waypoints.clear();
+	t_waypoints.push_back(vec3(0, 2, 0));
 
+	int counter = 0;
+	for (int i = -2; i < 3; i++)
+	{
+		for (int j = -1; j < 1; j++)
+		{
+			o_spherePositions.push_back(new Sphere(vec3(i * 1, -0.2f, j * 1), colors[counter], 0.15f));
+			++counter;
+		}
+	}
+
+	for (int i = -2; i < 3; i++)
+	{
+		for (int j = -1; j < 1; j++)
+		{
+			t_waypoints.clear();
+			t_waypoints.push_back(vec3(i * 5, 7, j * 5));
+			o_pointLightPositions.push_back(new PointLight(t_waypoints, vec3(1, 1, 1), 0.1, vec3(0, 1, 0)));
+		}
+	}
+
+}
+void World::OnePointLightsTenSpheres(vector<Sphere*>& o_spherePositions, vector<PointLight*>& o_pointLightPositions)
+{
+	vec3 red = vec3(1, 0, 0);
+	vec3 green = vec3(0, 1, 0);
+	vec3 blue = vec3(0, 0, 1);
+	vec3 yellow = vec3(1, 1, 0);
+	vec3 pink = vec3(1, 0, 1);
+	vec3 teal = vec3(0, 1, 1);
+	vector<vec3>colors;
+	colors.push_back(pink);
+	colors.push_back(red);
+	colors.push_back(green);
+	colors.push_back(yellow);
+	colors.push_back(blue);
+	colors.push_back(vec3(0.3f, 1, 1));
+	colors.push_back(vec3(0.5f, 0.5f, 0));
+	colors.push_back(vec3(0.3, 1, 0));
+	colors.push_back(vec3(0, 0.5f, 1));
+	colors.push_back(vec3(0, 0.5f, 0.3f));
+	vector<vec3> t_waypoints;
+	t_waypoints.clear();
+	t_waypoints.push_back(vec3(0, 2, 0));
+
+	int counter = 0;
+	for (int i = -2; i < 3; i++)
+	{
+		for (int j = -1; j < 1; j++)
+		{
+			o_spherePositions.push_back(new Sphere(vec3(i * 1, -0.2f, j * 1), colors[counter], 0.15f));
+			++counter;
+		}
+	}
+
+
+	t_waypoints.clear();
+	t_waypoints.push_back(vec3(-3, 6, 0));
+	o_pointLightPositions.push_back(new PointLight(t_waypoints, vec3(1, 1, 1), 0.1, vec3(0, 1, 0)));
+
+}
 void World::SetupWorld()
 {
 
@@ -76,11 +158,12 @@ void World::SetupWorld()
 
 
 	// Diffuse lighting
-	m_diffuseLights.push_back(new DiffuseLight(vec3(0, 0, 1)));
+	m_diffuseLights.push_back(new DiffuseLight(vec3(0, -0.5, -1)));
 	// Setup spheres
 	m_spheres.push_back(new Sphere(vec3(0, -401, 0), teal, 400.25f));
-   m_spheres.push_back(new Sphere(vec3(0, 0, 1), pink, 0.05f));
-
+    //m_spheres.push_back(new Sphere(vec3(0, 0, 1), pink, 0.05f));
+	TenPointLightsTenSpheres(m_spheres, m_pointLights);
+	//OnePointLightsTenSpheres(m_spheres, m_pointLights);
 
 
 	//Red sphere is kinda buggy. might   to do with length

@@ -101,9 +101,6 @@ Ray RayDirection() // used to return vec3
 }
 
 // More or less copy pasted from 3D lab 1 
-// Kommer inte kunna lösa problem om vi har två objekt efter varandra 
-
-
 float RayPwnSphere(vec3 rayPos, vec3 rayDir, vec3 spherePos, float sphereRad)
 {
 	float b = dot(rayDir, rayPos - spherePos);
@@ -160,74 +157,6 @@ float RayPwnTriangle(Ray ray, vec3 p0, vec3 p1, vec3 p2)
 	float t = f * dot(e2, q);
 	return t;
 }
-
-
-//Hitdata HitVsTriangle2(Ray ray, Hitdata hitdata, vec3 v0, vec3 v1, vec3 v2, int thisIndex, float hitDistance)
-//{
-//	vec3 v0v1 = v1-v0;
-//	vec3 v0v2 = v2-v0;
-//
-//	vec3 n = cross(v0v1, v0v2);
-//	float denom = dot(n,n); // strange...
-//
-//	float nDotDir = dot(n, ray.dir);
-//	if(abs(nDotDir) < 0)
-//	{
-//		return hitdata;
-//	}
-//
-//	float d = dot(n, v0);
-//
-//	float t = (dot(n, ray.pos) + d) / nDotDir;
-//
-//	if(t < 0)// || t > hitDistance )
-//	{
-//		return hitdata;
-//	}
-//
-//	vec3 p = ray.pos + t * ray.dir;
-//
-//	vec3 c;
-//
-//	// edge0
-//	vec3 edge0 = v1 - v0;
-//	vec3 vp0 = p - v0;
-//	c = cross(edge0, vp0);
-//
-//	if(dot(n, c) < 0)
-//		return hitdata;
-//
-//	// edge1
-//	vec3 edge1 = v2 - v1;
-//	vec3 vp1 = p - v1;
-//	c = cross(edge1, vp1);
-//	float u = 0;
-//	if((u = dot(n, c)) < 0)
-//	{
-//		return hitdata;
-//	}
-//
-//	// edge2
-//	vec3 edge2 = v0 - v2;
-//	vec3 vp2 = p - v2;
-//	c = cross(edge2, vp2);
-//	float v = 0;
-//	if((v = dot(n, c)) < 0)
-//	{
-//		return hitdata;
-//	}
-//
-//	u /= denom;
-//	v /= denom;
-//
-//	hitdata.position = p;
-//	hitdata.normal = normalize(n);
-//	hitdata.hitIndex = -1 *(1+thisIndex);
-//	hitdata.hit = true;
-//	hitdata.uv = vec2(u, v);
-//	return hitdata;
-//}
-
 
 // Big method that iterates through each geometry and returns hit data for the object we hit
 Hitdata ComputeHit(Ray ray)
@@ -404,7 +333,6 @@ float CalculatePointLightShadowOnly(Hitdata hitdata, Ray ray)
 				lightFactorColor *= 0.5; // How shadowy shadows become
 			}
 		}
-		//lightFactorColor *= 0.5;
 
 	}
 	return lightFactorColor;

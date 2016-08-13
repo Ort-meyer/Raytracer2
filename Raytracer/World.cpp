@@ -174,30 +174,8 @@ void World::SetupWorld()
 	vector<vec3> t_waypoints;
 	t_waypoints.clear();
 	t_waypoints.push_back(vec3(0, 2, 0));
-	//m_pointLights.push_back(new PointLight(t_waypoints, vec3(1, 1, 1), 0, vec3(0, 5, 0)));
-	//t_waypoints.clear();
-	//t_waypoints.push_back(vec3(0, -3, 0));
-	//m_pointLights.push_back(new PointLight(t_waypoints, vec3(1, 1, 1), 0, vec3(0, 5, 0)));
-
-	//for (int i = -2; i < 2; i++)
-	//{
-	//	for (int j = -2; j < 2; j++)
-	//	{
-	//		t_waypoints.clear();
-	//		t_waypoints.push_back(vec3(i*0.1, 5,j*0.1));
-	//		m_pointLights.push_back(new PointLight(t_waypoints, vec3(1, 1, 1), 0.0, vec3(0, 0.1, 0)));
-	//	}
-	//}
-
-	// Setup triangles (should be done via obj later)
 
 	vector<vec3> t_corners;
-
-   //ModelLoader t_modelLoader;
-   //vector<Triangle*> t_objTriangles = t_modelLoader.LoadModel("bth.obj");
-   //m_triangles.insert(m_triangles.end(), t_objTriangles.begin(), t_objTriangles.end());
-
-
 
 	/// Create ground plane
 	//float t_groundScale = 10;

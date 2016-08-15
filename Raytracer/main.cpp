@@ -184,8 +184,8 @@ void RenderScene()
 		{
 			frame = 0;
 			didItOnce = true;
-			cout << "frame took " << ((ctr2 - ctr1) * 1.0 / freq) << " seconds" << endl;
-			cout << "which is " << 1 / ((ctr2 - ctr1) * 1.0 / freq) << " frames per second" << endl;
+			//cout << "frame took " << ((ctr2 - ctr1) * 1.0 / freq) << " seconds" << endl;
+			//cout << "which is " << 1 / ((ctr2 - ctr1) * 1.0 / freq) << " frames per second" << endl;
 		}
 
 		frame++;
@@ -250,7 +250,7 @@ void CreateObjSSBO()
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, g_materialSSBO);
    // Create some materials
    vector<Material> t_materials;
-   t_materials.push_back(Material(1, 0, 0.1, 0.5, 4));
+   t_materials.push_back(Material(0.6, 0.4, 0.4, 0.5, 4));
    t_materials.push_back(Material(1, 0, 0.1, 0.1, 4));
 
    block_index = 4;

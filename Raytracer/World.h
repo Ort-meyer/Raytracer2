@@ -26,6 +26,8 @@ public:
 
 	void TenPointLightsTenSpheres(vector<Sphere*>& o_spherePositions, vector<PointLight*>& o_pointLightPositions);
 
+	void AddLights(int p_numLightsX, int p_numLightsY);
+
 	void OnePointLightsTenSpheres(vector<Sphere*>& o_spherePositions, vector<PointLight*>& o_pointLightPositions);
 
 private:

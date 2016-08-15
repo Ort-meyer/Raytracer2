@@ -37,7 +37,7 @@ uniform int numTrianglePositions;
 
 
 const int numTrianglesRendered = 1000;
-const int numBounces = 2;
+const int numBounces = 0;
 
 //BTH logo buffer
 layout (std430, binding = 2) buffer shader_data
@@ -162,71 +162,6 @@ float RayPwnTriangle(Ray ray, vec3 p0, vec3 p1, vec3 p2)
 }
 
 
-//Hitdata HitVsTriangle2(Ray ray, Hitdata hitdata, vec3 v0, vec3 v1, vec3 v2, int thisIndex, float hitDistance)
-//{
-//	vec3 v0v1 = v1-v0;
-//	vec3 v0v2 = v2-v0;
-//
-//	vec3 n = cross(v0v1, v0v2);
-//	float denom = dot(n,n); // strange...
-//
-//	float nDotDir = dot(n, ray.dir);
-//	if(abs(nDotDir) < 0)
-//	{
-//		return hitdata;
-//	}
-//
-//	float d = dot(n, v0);
-//
-//	float t = (dot(n, ray.pos) + d) / nDotDir;
-//
-//	if(t < 0)// || t > hitDistance )
-//	{
-//		return hitdata;
-//	}
-//
-//	vec3 p = ray.pos + t * ray.dir;
-//
-//	vec3 c;
-//
-//	// edge0
-//	vec3 edge0 = v1 - v0;
-//	vec3 vp0 = p - v0;
-//	c = cross(edge0, vp0);
-//
-//	if(dot(n, c) < 0)
-//		return hitdata;
-//
-//	// edge1
-//	vec3 edge1 = v2 - v1;
-//	vec3 vp1 = p - v1;
-//	c = cross(edge1, vp1);
-//	float u = 0;
-//	if((u = dot(n, c)) < 0)
-//	{
-//		return hitdata;
-//	}
-//
-//	// edge2
-//	vec3 edge2 = v0 - v2;
-//	vec3 vp2 = p - v2;
-//	c = cross(edge2, vp2);
-//	float v = 0;
-//	if((v = dot(n, c)) < 0)
-//	{
-//		return hitdata;
-//	}
-//
-//	u /= denom;
-//	v /= denom;
-//
-//	hitdata.position = p;
-//	hitdata.normal = normalize(n);
-//	hitdata.hitIndex = -1 *(1+thisIndex);
-//	hitdata.hit = true;
-//	hitdata.uv = vec2(u, v);
-//	return hitdata;
-//}
 
 
 // Big method that iterates through each geometry and returns hit data for the object we hit
@@ -303,6 +238,27 @@ Hitdata ComputeHit(Ray ray)
 		}
 	}
 
+	// Finally check manual triangles (the room)
+	for(int i = 0; i < numTrianglePositions; i++)
+	{
+		vec3 p0 = trianglePositions[i*3];
+		vec3 p1 = trianglePositions[i*3+1];
+		vec3 p2 = trianglePositions[i*3+2];
+	
+		float t = RayPwnTriangle(ray, p0,p1,p2);
+		if(t > 0 && t < hitDistance)
+		{
+			hitDistance = t;
+			vec3 normal = cross((p1-p0), (p2-p0));
+			hitdata.normal = normalize(normal);
+			hitdata.hit = true;
+			hitdata.hitIndex  = 0; // Hit the room
+			hitdata.position = ray.pos + ray.dir * t;
+		}
+	
+	
+	}
+
 	return hitdata;
 }
 
@@ -314,7 +270,7 @@ float CalculateLightStrength(vec3 vertexToEye, vec3 lightDirection, vec3 hitNorm
 	float matSpecularIntensity = 0.4;
 	float ambientIntensity = 0.1;
 
-	if(thisIndex < 0) // It's a triangle. Change values to material of triangle
+	if(false)//thisIndex < 0) // It's a triangle. Change values to material of triangle
 	{
 		int matIndex = triangleMaterialIndices[-1*(thisIndex + 1)];
 		diffuseIntensity = material[matIndex];
@@ -404,7 +360,6 @@ float CalculatePointLightShadowOnly(Hitdata hitdata, Ray ray)
 				lightFactorColor *= 0.5; // How shadowy shadows become
 			}
 		}
-		//lightFactorColor *= 0.5;
 
 	}
 	return lightFactorColor;
@@ -440,6 +395,14 @@ void main()
 				if(i == 0)
 					reflectionFactor = 0.5;
 				vec3 addColor = lightValue * sphereColors[hitdata.hitIndex-1];
+				endColor = addColor * reflectionFactor + (1-reflectionFactor) * endColor;
+				reflectionFactor = 0.5;
+			}
+			else if(hitdata.hitIndex == 0) //Hit the world box
+			{
+				if(i == 0)
+					reflectionFactor = 0.5;
+				vec3 addColor = lightValue * vec3(1,0,0);
 				endColor = addColor * reflectionFactor + (1-reflectionFactor) * endColor;
 				reflectionFactor = 0.5;
 			}

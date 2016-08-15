@@ -104,29 +104,36 @@ vector<Triangle> ModelLoader::LoadModel(const char * p_fileName)
 
     // Transform positions into triangles
     vector<Triangle> t_triangles;
-    for (size_t i = 0; i < t_corners.size() - 1; i+=3)
-    {
-        vector<vec3> t_cornersPos;
-		t_cornersPos.push_back(t_corners[i]);
-		t_cornersPos.push_back(t_corners[i+1]);
-		t_cornersPos.push_back(t_corners[i+2]);
-
-		vector<vec2> t_texCorners;
-		t_texCorners.push_back(t_texCoordsCorners[i]);
-		t_texCorners.push_back(t_texCoordsCorners[i+1]);
-		t_texCorners.push_back(t_texCoordsCorners[i+2]);
-		t_texCorners.push_back(vec2(t_corners[i].x, t_corners[i].y) * 2.0f);
-		t_texCorners.push_back(vec2(t_corners[i+1].x, t_corners[i+1].y) * 2.0f);
-		t_texCorners.push_back(vec2(t_corners[i+2].x, t_corners[i+2].y) * 2.0f);
-
-		//t_texCorners.push_back(vec2(0,0));
-		//t_texCorners.push_back(vec2(1, 0));
-		//t_texCorners.push_back(vec2(1, 1));
+	for (size_t j = 0; j < 1; j++)
+	{
 
 
-        t_triangles.push_back(Triangle(t_cornersPos, t_texCorners,vec3(1,1,0), t_materialIndices[i/3]));
 
-    }
+		for (size_t i = 0; i < t_corners.size() - 1; i += 3)
+		{
+			vec3 trans = vec3(1, 0, 0);
+			vector<vec3> t_cornersPos;
+			t_cornersPos.push_back(t_corners[i] + (float)j * trans);
+			t_cornersPos.push_back(t_corners[i + 1] + (float)j * trans);
+			t_cornersPos.push_back(t_corners[i + 2] + (float)j * trans);
+
+			vector<vec2> t_texCorners;
+			t_texCorners.push_back(t_texCoordsCorners[i]);
+			t_texCorners.push_back(t_texCoordsCorners[i + 1]);
+			t_texCorners.push_back(t_texCoordsCorners[i + 2]);
+			t_texCorners.push_back(vec2(t_corners[i].x, t_corners[i].y) * 2.0f);
+			t_texCorners.push_back(vec2(t_corners[i + 1].x, t_corners[i + 1].y) * 2.0f);
+			t_texCorners.push_back(vec2(t_corners[i + 2].x, t_corners[i + 2].y) * 2.0f);
+
+			//t_texCorners.push_back(vec2(0,0));
+			//t_texCorners.push_back(vec2(1, 0));
+			//t_texCorners.push_back(vec2(1, 1));
+
+
+			t_triangles.push_back(Triangle(t_cornersPos, t_texCorners, vec3(1, 1, 0), t_materialIndices[i / 3]));
+
+		}
+	}
 	//t_triangles.clear();
 	//
 	//

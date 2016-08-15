@@ -6,6 +6,7 @@
 #include <GL\glew.h>
 #include <GL\freeglut.h>
 #include <glm\glm.hpp>
+#include <windows.h>
 
 
 // My own stuff
@@ -71,101 +72,124 @@ using namespace std;
 // Big render method. Where we do all our rendering
 void RenderScene()
 {
-	// Update things
-	g_camera->Update();
-	g_world->UpdateWorld();
-
-	/// Render things DO COMPUTE THINGIES
-	// Start with clearing the screen
-	glClear(GL_COLOR_BUFFER_BIT);
-
-	// Start with compute shader
-	glUseProgram(g_computeProgramHandle);
-	
-	//glActiveTexture(GL_TEXTURE0);
-	//glBindImageTexture(0, g_computeOutputHandle, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
-	//glActiveTexture(GL_TEXTURE1);
-	//glBindImageTexture(1, g_cheryl, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
-
-
-
-	// BELOW STUFF IS IMPORTANT!!
-	// We use texture 0, our only texture. Will probably have to be changed in the future
-	// Texture
-	glActiveTexture(GL_TEXTURE0);
-	glBindImageTexture(0, g_computeOutputHandle, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
-	glActiveTexture(GL_TEXTURE1);
-	glBindImageTexture(1, g_cheryl, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
-	
-	// Send position and direction of camera 
-	glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "cameraPosition"), 1, &g_camera->m_position[0]);
-	glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "cameraDirection"), 1, &g_camera->m_target[0]);
-	// Send in frustum
-	glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "ray00"), 1, &g_camera->m_frustum.ray00[0]);
-	glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "ray10"), 1, &g_camera->m_frustum.ray10[0]);
-	glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "ray11"), 1, &g_camera->m_frustum.ray11[0]);
-	glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "ray01"), 1, &g_camera->m_frustum.ray01[0]);
-	
-	// Send in light positions
-	vector<vec3> t_lightPositions;
-	g_world->GetPointLightInfor(t_lightPositions);
-	if (t_lightPositions.size() > 0)
+	// Timing taken from http://stackoverflow.com/questions/1604582/timing-program-runtimes-in-visual-c
+	__int64 ctr1 = 0, ctr2 = 0, freq = 0;
+	if (QueryPerformanceCounter((LARGE_INTEGER *)&ctr1) != 0)
 	{
-		glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "lightPositions"), t_lightPositions.size(), &t_lightPositions[0][0]);
-		glUniform1i(glGetUniformLocation(g_computeProgramHandle, "numLights"), t_lightPositions.size());
+		if (QueryPerformanceCounter)
+			// Update things
+			g_camera->Update();
+		g_world->UpdateWorld();
+
+		/// Render things DO COMPUTE THINGIES
+		// Start with clearing the screen
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		// Start with compute shader
+		glUseProgram(g_computeProgramHandle);
+
+		//glActiveTexture(GL_TEXTURE0);
+		//glBindImageTexture(0, g_computeOutputHandle, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+		//glActiveTexture(GL_TEXTURE1);
+		//glBindImageTexture(1, g_cheryl, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+
+
+
+		// BELOW STUFF IS IMPORTANT!!
+		// We use texture 0, our only texture. Will probably have to be changed in the future
+		// Texture
+		glActiveTexture(GL_TEXTURE0);
+		glBindImageTexture(0, g_computeOutputHandle, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+		glActiveTexture(GL_TEXTURE1);
+		glBindImageTexture(1, g_cheryl, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+
+		// Send position and direction of camera 
+		glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "cameraPosition"), 1, &g_camera->m_position[0]);
+		glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "cameraDirection"), 1, &g_camera->m_target[0]);
+		// Send in frustum
+		glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "ray00"), 1, &g_camera->m_frustum.ray00[0]);
+		glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "ray10"), 1, &g_camera->m_frustum.ray10[0]);
+		glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "ray11"), 1, &g_camera->m_frustum.ray11[0]);
+		glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "ray01"), 1, &g_camera->m_frustum.ray01[0]);
+
+		// Send in light positions
+		vector<vec3> t_lightPositions;
+		g_world->GetPointLightInfor(t_lightPositions);
+		if (t_lightPositions.size() > 0)
+		{
+			glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "lightPositions"), t_lightPositions.size(), &t_lightPositions[0][0]);
+			glUniform1i(glGetUniformLocation(g_computeProgramHandle, "numLights"), t_lightPositions.size());
+		}
+
+		vector<vec3> t_diffuseLightingDirection;
+		g_world->GetDiffuseLighting(t_diffuseLightingDirection);
+		if (t_diffuseLightingDirection.size() > 0)
+		{
+			glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "diffuseLightingDirections"), t_diffuseLightingDirection.size(), &t_diffuseLightingDirection[0][0]);
+			glUniform1i(glGetUniformLocation(g_computeProgramHandle, "numDiffuseLights"), t_diffuseLightingDirection.size());
+		}
+		// Send in spheres
+		vector<vec3> t_spherePositions;
+		vector<float> t_sphereRadii;
+		vector<vec3> t_sphereColors;
+		g_world->GetSphereInfo(t_spherePositions, t_sphereRadii, t_sphereColors);
+		if (t_spherePositions.size() > 0)
+		{
+			glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "spherePositions"), t_spherePositions.size(), &t_spherePositions[0][0]);
+			glUniform1fv(glGetUniformLocation(g_computeProgramHandle, "sphereRadii"), t_sphereRadii.size(), &t_sphereRadii[0]);
+			glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "spherePositions"), t_spherePositions.size(), &t_spherePositions[0][0]);
+			glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "sphereColors"), t_sphereColors.size(), &t_sphereColors[0][0]);
+			glUniform1i(glGetUniformLocation(g_computeProgramHandle, "numSpheres"), t_spherePositions.size());
+		}
+
+		// Send in triangles
+		vector<vec3> t_trianglePositions;
+		vector<vec3> t_triangleColors;
+		g_world->GetTriangleInfo(t_trianglePositions, t_triangleColors);
+		if (t_trianglePositions.size() > 0)
+		{
+			glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "trianglePositions"), t_trianglePositions.size(), &t_trianglePositions[0][0]);
+			glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "triangleColors"), t_triangleColors.size(), &t_triangleColors[0][0]);
+			glUniform1i(glGetUniformLocation(g_computeProgramHandle, "numTrianglePositions"), t_trianglePositions.size());
+		}
+
+		//// BTH ssbo thingies
+		//GLuint block_index = 0;
+		//block_index = glGetProgramResourceIndex(g_computeProgramHandle, GL_SHADER_STORAGE_BLOCK, "shader_data");
+		//GLuint ssbo_binding_point_index = 2;
+		//glShaderStorageBlockBinding(g_computeProgramHandle, block_index, ssbo_binding_point_index);
+
+		// Start compute
+		glDispatchCompute(1024 / 16, 768 / 16, 1);
+
+		/// END COMPUTE THINGIES
+
+		// Render the results
+		glUseProgram(g_renderProgramHandle);
+
+		//glUniform1i(g_computeProgramHandle, 0);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, g_computeOutputHandle);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		glutSwapBuffers();
+
+		QueryPerformanceCounter((LARGE_INTEGER *)&ctr2);
+		QueryPerformanceFrequency((LARGE_INTEGER *)&freq);
+
+
+
+		static bool didItOnce = false;
+		static int frame = 0;
+		if (frame == 30)
+		{
+			frame = 0;
+			didItOnce = true;
+			cout << "frame took " << ((ctr2 - ctr1) * 1.0 / freq) << " seconds" << endl;
+			cout << "which is " << 1 / ((ctr2 - ctr1) * 1.0 / freq) << " frames per second" << endl;
+		}
+
+		frame++;
 	}
-	
-	vector<vec3> t_diffuseLightingDirection;
-	g_world->GetDiffuseLighting(t_diffuseLightingDirection);
-	if (t_diffuseLightingDirection.size() > 0)
-	{
-		glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "diffuseLightingDirections"), t_diffuseLightingDirection.size(), &t_diffuseLightingDirection[0][0]);
-		glUniform1i(glGetUniformLocation(g_computeProgramHandle, "numDiffuseLights"), t_diffuseLightingDirection.size());
-	}
-	// Send in spheres
-	vector<vec3> t_spherePositions;
-	vector<float> t_sphereRadii;
-	vector<vec3> t_sphereColors;
-	g_world->GetSphereInfo(t_spherePositions, t_sphereRadii, t_sphereColors);
-	if (t_spherePositions.size() > 0)
-	{
-		glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "spherePositions"), t_spherePositions.size(), &t_spherePositions[0][0]);
-		glUniform1fv(glGetUniformLocation(g_computeProgramHandle, "sphereRadii"), t_sphereRadii.size(), &t_sphereRadii[0]);
-		glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "spherePositions"), t_spherePositions.size(), &t_spherePositions[0][0]);
-		glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "sphereColors"), t_sphereColors.size(), &t_sphereColors[0][0]);
-		glUniform1i(glGetUniformLocation(g_computeProgramHandle, "numSpheres"), t_spherePositions.size());
-	}
-	
-	// Send in triangles
-	vector<vec3> t_trianglePositions;
-	vector<vec3> t_triangleColors;
-	g_world->GetTriangleInfo(t_trianglePositions, t_triangleColors);
-	if (t_trianglePositions.size() > 0)
-	{
-		glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "trianglePositions"), t_trianglePositions.size(), &t_trianglePositions[0][0]);
-		glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "triangleColors"), t_triangleColors.size(), &t_triangleColors[0][0]);
-		glUniform1i(glGetUniformLocation(g_computeProgramHandle, "numTrianglePositions"), t_trianglePositions.size());
-	}
-
-	//// BTH ssbo thingies
-	//GLuint block_index = 0;
-	//block_index = glGetProgramResourceIndex(g_computeProgramHandle, GL_SHADER_STORAGE_BLOCK, "shader_data");
-	//GLuint ssbo_binding_point_index = 2;
-	//glShaderStorageBlockBinding(g_computeProgramHandle, block_index, ssbo_binding_point_index);
-
-	// Start compute
-	glDispatchCompute(1024 / 16, 768 / 16, 1);
-
-	/// END COMPUTE THINGIES
-
-	// Render the results
-	glUseProgram(g_renderProgramHandle);	
-
-	//glUniform1i(g_computeProgramHandle, 0);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, g_computeOutputHandle);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	glutSwapBuffers();
 }
 
 void CreateObjSSBO()
@@ -343,7 +367,7 @@ int main(int argc, char** argv)
 	g_computeProgramHandle = My_CreateShaderprogram(t_computeShaders);
 
 	// Create the camera
-	g_camera = new Camera(vec3(0, 0, 1), vec3(0, 1, 0), vec3(1, -1, -3));
+	g_camera = new Camera(vec3(0, 0, 1), vec3(0, 1, 0), vec3(0, 0.5, -5));
 	
 	// CreateWorld
 	g_world = new World();

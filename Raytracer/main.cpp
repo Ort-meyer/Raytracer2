@@ -367,7 +367,7 @@ int main(int argc, char** argv)
 	g_computeProgramHandle = My_CreateShaderprogram(t_computeShaders);
 
 	// Create the camera
-	g_camera = new Camera(vec3(0, 0, 1), vec3(0, 1, 0), vec3(0, 0.5, -5));
+	g_camera = new Camera(vec3(0, 0, 1), vec3(0, 1, 0), vec3(0, 0, -2));
 	
 	// CreateWorld
 	g_world = new World();

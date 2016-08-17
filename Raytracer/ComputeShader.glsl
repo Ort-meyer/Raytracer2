@@ -264,62 +264,66 @@ Hitdata ComputeHit(Ray ray)
 
 float CalculateLightStrength(vec3 vertexToEye, vec3 lightDirection, vec3 hitNormal, int thisIndex)
 {
-	// This values will be used by spheres
-	float diffuseIntensity = 0.6;
+	float diffuseIntensity = 0.4;
 	float specularPower = 4;
-	float matSpecularIntensity = 0.4;
+	float specularIntensity = 0.6;
 	float ambientIntensity = 0.1;
 
-	if(false)//thisIndex < 0) // It's a triangle. Change values to material of triangle
+	if(thisIndex < 0) // It's a triangle. Change values to material of triangle
 	{
 		int matIndex = triangleMaterialIndices[-1*(thisIndex + 1)];
 		diffuseIntensity = material[matIndex];
-		matSpecularIntensity = material[matIndex+1];
-		ambientIntensity = material[matIndex+2];
+		specularIntensity = material[matIndex+1];
 		specularPower = material[matIndex+4];
 	}
 
-	// Simple diffuse calculation
-	float diffuseFactor = dot(hitNormal, -lightDirection) * diffuseIntensity;
-	float specularFactor = 0.0f;
-	vec3 lightReflect = normalize(reflect(lightDirection, hitNormal));
-	specularFactor = dot(vertexToEye, lightReflect);
-	specularFactor = matSpecularIntensity * pow(specularFactor, specularPower);
+	float diffuseFactor = dot(normalize(hitNormal), -lightDirection);
+	float specularFactor = 0;
+	if(diffuseFactor > 0.0001)
+	{
+		vec3 lightReflect = normalize(reflect(lightDirection, hitNormal));
+		specularFactor = dot(vertexToEye, lightReflect);
+		if(specularFactor > 0.0001)
+		{
+			specularFactor = pow(specularFactor, specularPower);
+		}
+		else
+			specularFactor = 0;
+	}
+	else
+		diffuseFactor = 0;
 
-	return diffuseFactor + clamp(specularFactor, 0, 1.0f) + ambientIntensity; 
+	return (ambientIntensity + diffuseFactor * diffuseIntensity + specularFactor * specularIntensity);
+
+
 }
 
 float CalculatePointLightLightingOnly(Hitdata hitdata, Ray ray, int thisIndex)
 {
-	float lightFactorColor = 0.1; // some ambient
+	//return lightFactorColor;
+
+	float lightValue = 0;
+	// Iterate through all point lights
 	for(int i = 0; i < numLights; ++i)
 	{
 		vec3 lightDirection =  hitdata.position - lightPositions[i];
 		float distance = length(lightDirection);
 		lightDirection = normalize(lightDirection);
-		
-		float lightValue = CalculateLightStrength(cameraPosition - hitdata.position, lightDirection, hitdata.normal, thisIndex);
-		
 
-		lightFactorColor += lightValue / (0.1 + 0.1 * distance + 0.1 * distance * distance);
-		
-		// vector between light and where the ray hit an object
-		vec3 hitLightVector = lightPositions[i] - hitdata.position;
-		// "Angle" between hitLightVector and normal of hit
-		float normalLightDot = dot(hitdata.normal, hitLightVector);
-		
-		float currentLightColorFactor = normalLightDot;
-		currentLightColorFactor *= 1 - length(hitLightVector) * 0.145; // This is for light cutoff 
-		lightFactorColor += clamp(currentLightColorFactor, 0, 1);
+		float thisLightValue = CalculateLightStrength(normalize(ray.pos - hitdata.position), lightDirection, hitdata.normal, thisIndex); // Use ray's position instead??
 
+		float attenuation = 0.1 + 0.1 * distance + 0.1 * distance * distance; // Some made up attenuation values
+
+		lightValue += thisLightValue / attenuation;
 	}
+
+	// Then get all directional lights
 	for(int i = 0; i<numDiffuseLights; i++)
 	{
-		lightFactorColor += CalculateLightStrength(normalize(cameraPosition - hitdata.position), diffuseLightingDirections[i], hitdata.normal, thisIndex);
+		lightValue += CalculateLightStrength(normalize(cameraPosition - hitdata.position), diffuseLightingDirections[i], hitdata.normal, thisIndex);
 	}
-	// Ensure there's always ambience
-	lightFactorColor = clamp(lightFactorColor, 0, 1.0f);
-	return lightFactorColor;
+
+	return lightValue;
 }
 
 float CalculatePointLightShadowOnly(Hitdata hitdata, Ray ray)
@@ -417,6 +421,7 @@ void main()
 				endColor = addColor * reflectionFactor + endColor * (1-reflectionFactor);
 				int materialArrayReflectionSlot = (triangleMaterialIndices[-1*(hitdata.hitIndex+1)]-1) * 5 + 3;
 				reflectionFactor = material[materialArrayReflectionSlot];
+				break;
 			}
 	
 			// Change ray for bounce

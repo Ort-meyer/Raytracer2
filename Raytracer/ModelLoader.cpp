@@ -55,10 +55,10 @@ vector<Triangle> ModelLoader::LoadModel(const char * p_fileName)
         {
             vec3 t_position;
             fscanf_s(t_file, "%f %f %f\n", &t_position.x, &t_position.y, &t_position.z);
-			mat4x4 t_scaleMat = scale(vec3(0.1, 0.1, 0.1) * 5.0f);
+            mat4x4 t_scaleMat;// = scale(vec3(0.1, 0.1, 0.1) * 5.0f);
 			mat4x4 t_rotMat;// = rotate(-(3.1415f / 2.0f), vec3(1, 0, 0));
 			mat4x4 t_rotMat2;// = rotate(3.1415f / 2.0f, vec3(0, 0, 1));
-			vec3 t_translation = vec3(0, 0, 0);
+			vec3 t_translation = vec3(-2.5, -0.5, 0);
 			t_scaleMat = t_rotMat * t_rotMat2 * t_scaleMat;
 			//t_scaleMat *= 0.1f;
             t_positions.push_back(t_translation + vec3(t_scaleMat * vec4(t_position,0)));
@@ -104,14 +104,14 @@ vector<Triangle> ModelLoader::LoadModel(const char * p_fileName)
 
     // Transform positions into triangles
     vector<Triangle> t_triangles;
-	for (size_t j = 0; j < 1; j++)
+	for (size_t j = 0; j < 1; j++) // Number of boxes sortof
 	{
 
 
 
 		for (size_t i = 0; i < t_corners.size() - 1; i += 3)
 		{
-			vec3 trans = vec3(1, 0, 0);
+			vec3 trans = vec3(1.5, 0, 0);
 			vector<vec3> t_cornersPos;
 			t_cornersPos.push_back(t_corners[i] + (float)j * trans);
 			t_cornersPos.push_back(t_corners[i + 1] + (float)j * trans);

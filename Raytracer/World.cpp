@@ -187,18 +187,22 @@ void World::SetupWorld()
 	// Setup point lights
 	vector<vec3> t_waypoints;
 	t_waypoints.clear();
-	t_waypoints.push_back(vec3(-0.65, 0.2, 0));
-	m_pointLights.push_back(new PointLight(t_waypoints, vec3(1, 1, 1), 0, vec3(0, 5, 0)));
-	//t_waypoints.clear();
-	//t_waypoints.push_back(vec3(0, -3, 0));
-	//m_pointLights.push_back(new PointLight(t_waypoints, vec3(1, 1, 1), 0, vec3(0, 5, 0)));
+	t_waypoints.push_back(vec3(-1, 0, -1));
+	m_pointLights.push_back(new PointLight(t_waypoints, vec3(1, 1, 1), 0, vec3(1, 0, 0)));
+    t_waypoints.clear();
+    t_waypoints.push_back(vec3(-0, 0, -1));
+    m_pointLights.push_back(new PointLight(t_waypoints, vec3(1, 1, 1), 0, vec3(1, 0, 0)));
+    t_waypoints.clear();
+    t_waypoints.push_back(vec3(1, 0, -1));
+    m_pointLights.push_back(new PointLight(t_waypoints, vec3(1, 1, 1), 0, vec3(1, 0, 0)));
 
+    //vec3 spread = vec3(0.5, 0, 0.5);
 	//for (int i = -2; i < 2; i++)
 	//{
 	//	for (int j = -2; j < 2; j++)
 	//	{
 	//		t_waypoints.clear();
-	//		t_waypoints.push_back(vec3(i*0.1, 5,j*0.1));
+	//		t_waypoints.push_back(vec3(i*spread.x, spread.y,j*spread.z));
 	//		m_pointLights.push_back(new PointLight(t_waypoints, vec3(1, 1, 1), 0.0, vec3(0, 0.1, 0)));
 	//	}
 	//}

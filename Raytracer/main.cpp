@@ -47,6 +47,19 @@ GLuint g_computeProgramHandle;
 Camera* g_camera;
 World* g_world;
 
+
+/// Test parameters
+int TEST_threadsPerGroupX = 32;
+int TEST_threadsPerGroupY = 32;
+
+int TEST_windowWidth = 1024;
+int TEST_windowHeight = 768;
+
+int TEST_numberOfLights = 1;
+
+int TEST_numberOfTriangles = 12;
+
+
 struct Material 
 {
    Material(float p_diffuse, float p_specular, float p_ambient, float p_reflection, float p_specularPower) 
@@ -152,6 +165,15 @@ void RenderScene()
 			glUniform3fv(glGetUniformLocation(g_computeProgramHandle, "triangleColors"), t_triangleColors.size(), &t_triangleColors[0][0]);
 			glUniform1i(glGetUniformLocation(g_computeProgramHandle, "numTrianglePositions"), t_trianglePositions.size());
 		}
+
+
+        glUniform1i(glGetUniformLocation(g_computeProgramHandle, "test_windowHeight"), TEST_windowWidth);
+        glUniform1i(glGetUniformLocation(g_computeProgramHandle, "test_windowWidth"), TEST_windowWidth);
+        glUniform1i(glGetUniformLocation(g_computeProgramHandle, "test_nubmerOfLights"), TEST_numberOfLights);
+        glUniform1i(glGetUniformLocation(g_computeProgramHandle, "test_numberOfTriangles"), TEST_numberOfTriangles);
+
+        // Test variables
+
 
 		//// BTH ssbo thingies
 		//GLuint block_index = 0;

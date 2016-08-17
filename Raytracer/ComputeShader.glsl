@@ -34,7 +34,11 @@ uniform vec3[3*40] trianglePositions; // 3 corners times maximum of 10 triangles
 uniform vec3[40] triangleColors;
 uniform int numTrianglePositions;
 
-
+// Test variables
+uniform int test_windowHeight;
+uniform int test_windowWidth;
+uniform int test_nubmerOfLights;
+uniform int test_numberOfTriangles;
 
 const int numTrianglesRendered = 1000;
 const int numBounces = 0;

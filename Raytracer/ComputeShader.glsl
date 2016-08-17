@@ -37,11 +37,9 @@ uniform int numTrianglePositions;
 // Test variables
 uniform int test_windowHeight;
 uniform int test_windowWidth;
-uniform int test_nubmerOfLights;
+uniform int test_numberOfLights;
 uniform int test_numberOfTriangles;
-
-const int numTrianglesRendered = 1000;
-const int numBounces = 0;
+uniform int test_numberOfBounces;
 
 //BTH logo buffer
 layout (std430, binding = 2) buffer shader_data
@@ -85,8 +83,8 @@ struct Hitdata
 
 Ray RayDirection() // used to return vec3
 {
-	float width = 1024;
-	float height = 768;
+	float width = test_windowWidth;
+	float height = test_windowHeight;
 	float normalized_i = ((gl_GlobalInvocationID.x / width) - 0.5);
 	float normalized_j = ((gl_GlobalInvocationID.y / height) - 0.5);
 
@@ -193,7 +191,7 @@ Hitdata ComputeHit(Ray ray)
 	}
 
 	// Now iterate through all triangles in ssbo. Yup, this is smart
-	for(int i = 0; i < numTrianglesRendered; i+=9)
+	for(int i = 0; i < test_numberOfTriangles * 9; i+=9)
 	{
 		vec3 p0 = vec3(bthCorners[i], bthCorners[i+1], bthCorners[i+2]);
 		vec3 p1 = vec3(bthCorners[i+3], bthCorners[i+4], bthCorners[i+5]);
@@ -308,7 +306,7 @@ float CalculatePointLightLightingOnly(Hitdata hitdata, Ray ray, int thisIndex)
 
 	float lightValue = 0;
 	// Iterate through all point lights
-	for(int i = 0; i < numLights; ++i)
+	for(int i = 0; i < numLights && i < test_numberOfLights; ++i)
 	{
 		vec3 lightDirection =  hitdata.position - lightPositions[i];
 		float distance = length(lightDirection);
@@ -334,13 +332,13 @@ float CalculatePointLightShadowOnly(Hitdata hitdata, Ray ray)
 {
 
 	float lightFactorColor = 1;
-	for(int i = 0; i < numLights; i++)
+	for(int i = 0; i < numLights && i < test_numberOfLights; i++)
 	{
 		// vector between light and where the ray hit an object
 		vec3 hitLightVector = lightPositions[i] - hitdata.position;
 		// "Angle" between hitLightVector and normal of hit
 		float normalLightDot = dot(hitdata.normal, hitLightVector);
-		if(normalLightDot > 0)
+		if(normalLightDot > 0.0002)
 		{
 			// First, see if there's anything in the way.
 			Ray shadowRay;
@@ -389,7 +387,7 @@ void main()
 
 	float lightValue = 0;
 
-	for(int i = 0; i < numBounces+1; i++)
+	for(int i = 0; i < test_numberOfBounces+1; i++)
 	{
 		Hitdata hitdata = ComputeHit(ray);
 		if(hitdata.hit)
@@ -438,7 +436,7 @@ void main()
 	
 
 	ivec2 storePos = ivec2(gl_GlobalInvocationID.xy);
-	storePos.y = 768 - storePos.y;
+	storePos.y = test_windowHeight - storePos.y;
 
 	imageStore(destTex, storePos, vec4(endColor.xyz,0));
 }

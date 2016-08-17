@@ -7,6 +7,9 @@ const int g_windowheight = 768;
 const int TEST_threadsPerGroupX = 32;
 const int TEST_threadsPerGroupY = 32;
 
-const int TEST_numberOfLights = 1;
+const int TEST_numberOfLights = 3;
 
-const int TEST_numberOfTriangles = 12;
+// each box is 12 triangles
+const int TEST_numberOfTriangles = 12*1;
+
+const int TEST_numberOfBounces = 4;

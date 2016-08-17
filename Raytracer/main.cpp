@@ -155,10 +155,11 @@ void RenderScene()
 		}
 
 
-        glUniform1i(glGetUniformLocation(g_computeProgramHandle, "test_windowHeight"), g_windowWidth);
-        glUniform1i(glGetUniformLocation(g_computeProgramHandle, "test_windowWidth"), g_windowheight);
-        glUniform1i(glGetUniformLocation(g_computeProgramHandle, "test_nubmerOfLights"), TEST_numberOfLights);
+        glUniform1i(glGetUniformLocation(g_computeProgramHandle, "test_windowWidth"), g_windowWidth);
+        glUniform1i(glGetUniformLocation(g_computeProgramHandle, "test_windowHeight"), g_windowheight);
+        glUniform1i(glGetUniformLocation(g_computeProgramHandle, "test_numberOfLights"), TEST_numberOfLights);
         glUniform1i(glGetUniformLocation(g_computeProgramHandle, "test_numberOfTriangles"), TEST_numberOfTriangles);
+        glUniform1i(glGetUniformLocation(g_computeProgramHandle, "test_numberOfBounces"), TEST_numberOfBounces);
 
         // Test variables
 

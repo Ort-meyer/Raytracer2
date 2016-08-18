@@ -69,8 +69,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\Users\BOSS\Source\Repos\Raytracer2\include;D:\Skolprojekt\Repos\Raytracer2\include;C:\Users\BOSS\Source\Repos\Raytracer2\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\BOSS\Source\Repos\Raytracer2\lib;D:\Skolprojekt\Repos\Raytracer2\lib;C:\Users\BOSS\Source\Repos\Raytracer2\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\Eric\Source\Repos\Raytracer2\include;C:\Users\BOSS\Source\Repos\Raytracer2\include;D:\Skolprojekt\Repos\Raytracer2\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\Eric\Source\Repos\Raytracer2\lib;C:\Users\BOSS\Source\Repos\Raytracer2\lib;D:\Skolprojekt\Repos\Raytracer2\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>C:\Users\BOSS\Source\Repos\Raytracer2\include;$(IncludePath)</IncludePath>

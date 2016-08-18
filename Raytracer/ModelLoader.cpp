@@ -105,8 +105,8 @@ vector<Triangle> ModelLoader::LoadModel(const char * p_fileName)
     // Transform positions into triangles
     vector<Triangle> t_triangles;
 
-    vec3 t_grid = vec3(3, 3, 3);
-    vec3 t_boxSpread = vec3(1, 1, 1);
+    vec3 t_grid = vec3(9, 9, 1);
+    vec3 t_boxSpread = 0.5f * vec3(1, 1, 1);
     // Big for loops for the grid
     for (size_t x = 0; x < t_grid.x; x++) // Number of boxes sortof
         for (size_t y = 0; y < t_grid.y; y++)

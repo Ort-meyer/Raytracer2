@@ -1,6 +1,7 @@
 // Standard libraries
 #include <iostream>
 #include <vector>
+#include <fstream>
 
 // 3rd party libraries
 #include <GL\glew.h>
@@ -188,18 +189,29 @@ void RenderScene()
 		QueryPerformanceFrequency((LARGE_INTEGER *)&freq);
 
 
-
-		static bool didItOnce = false;
 		static int frame = 0;
-		if (frame == 30)
+		static float totalTime = 0;
+		static bool doOnce = false;
+		if (frame < 10)
 		{
-			frame = 0;
-			didItOnce = true;
-			//cout << "frame took " << ((ctr2 - ctr1) * 1.0 / freq) << " seconds" << endl;
-			//cout << "which is " << 1 / ((ctr2 - ctr1) * 1.0 / freq) << " frames per second" << endl;
+			totalTime += ((ctr2 - ctr1) * 1.0 / freq);
+			frame++;
+		}
+		else if (!doOnce)
+		{
+			ofstream outFile;
+			outFile.open("results.txt");
+			doOnce = true;
+			outFile << "10 frames took on avrage " << totalTime / 10 << " seconds with parameters: " << endl
+				<< g_windowWidth << "x" << g_windowheight << endl
+				<< TEST_threadsPerGroupX << "x" << TEST_threadsPerGroupY << endl
+				<< TEST_numberOfBounces << endl
+				<< TEST_numberOfTriangles << endl
+				<< TEST_numberOfLights << endl;
 		}
 
-		frame++;
+		//cout << "frame took " << ((ctr2 - ctr1) * 1.0 / freq) << " seconds" << endl;
+		//cout << "which is " << 1 / ((ctr2 - ctr1) * 1.0 / freq) << " frames per second" << endl;
 	}
 }
 

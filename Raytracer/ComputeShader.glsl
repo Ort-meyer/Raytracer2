@@ -13,7 +13,7 @@ uniform vec3 ray01;
 layout(binding=0,rgba8) uniform image2D destTex;
 layout(binding=1) uniform sampler2D boxTextureSampler;
 
-layout (local_size_x = 16, local_size_y = 16) in;
+layout (local_size_x = 32, local_size_y = 32) in;
 
 
 //Lights

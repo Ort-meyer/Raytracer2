@@ -196,6 +196,17 @@ void World::SetupWorld()
     t_waypoints.push_back(vec3(1, 0, -1));
     m_pointLights.push_back(new PointLight(t_waypoints, vec3(1, 1, 1), 0, vec3(1, 0, 0)));
 
+    t_waypoints.clear();
+    t_waypoints.push_back(vec3(-1.5, 0, -1));
+    m_pointLights.push_back(new PointLight(t_waypoints, vec3(1, 1, 1), 0, vec3(1, 0, 0)));
+    t_waypoints.clear();
+    t_waypoints.push_back(vec3(-0, 0, -1.5));
+    m_pointLights.push_back(new PointLight(t_waypoints, vec3(1, 1, 1), 0, vec3(1, 0, 0)));
+    t_waypoints.clear();
+    t_waypoints.push_back(vec3(1.5, 0, -1));
+    m_pointLights.push_back(new PointLight(t_waypoints, vec3(1, 1, 1), 0, vec3(1, 0, 0)));
+
+
     //vec3 spread = vec3(0.5, 0, 0.5);
 	//for (int i = -2; i < 2; i++)
 	//{

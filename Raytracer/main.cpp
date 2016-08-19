@@ -172,7 +172,7 @@ void RenderScene()
 		//glShaderStorageBlockBinding(g_computeProgramHandle, block_index, ssbo_binding_point_index);
 
 		// Start compute
-		glDispatchCompute(1024 / 16, 768 / 16, 1);
+		glDispatchCompute(g_windowWidth / TEST_threadsPerGroupX, g_windowheight / TEST_threadsPerGroupX, 1);
 
 		/// END COMPUTE THINGIES
 
@@ -390,7 +390,7 @@ int main(int argc, char** argv)
 	g_computeProgramHandle = My_CreateShaderprogram(t_computeShaders);
 
 	// Create the camera
-	g_camera = new Camera(vec3(0, 0, 1), vec3(0, 1, 0), vec3(0, 0, -2));
+	g_camera = new Camera(vec3(0, 0, 1), vec3(0, 1, 0), vec3(0, 0, -15));
 	
 	// CreateWorld
 	g_world = new World();

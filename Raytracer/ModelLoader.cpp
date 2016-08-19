@@ -58,7 +58,7 @@ vector<Triangle> ModelLoader::LoadModel(const char * p_fileName)
             mat4x4 t_scaleMat= scale(vec3(0.3, 0.3, 0.3));
             mat4x4 t_rotMat;// = rotate(-(3.1415f / 2.0f), vec3(1, 0, 0));
             mat4x4 t_rotMat2;// = rotate(3.1415f / 2.0f, vec3(0, 0, 1));
-            vec3 t_translation = vec3(-2.5, -0.5, 0);
+            vec3 t_translation = vec3(-1.5, -1.5, 2);
             t_scaleMat = t_rotMat * t_rotMat2 * t_scaleMat;
             //t_scaleMat *= 0.1f;
             t_positions.push_back(t_translation + vec3(t_scaleMat * vec4(t_position, 0)));
